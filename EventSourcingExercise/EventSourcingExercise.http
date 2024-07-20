@@ -1,6 +1,14 @@
 @EventSourcingExercise_HostAddress = http://localhost:5041
 
+### Health check
 GET {{EventSourcingExercise_HostAddress}}/_hc/
 Accept: application/json
 
-###
+### Payment successful
+POST {{EventSourcingExercise_HostAddress}}/transaction/pay
+Accept: application/json
+Content-Type: application/json
+
+{
+  "Amount": 5
+}
