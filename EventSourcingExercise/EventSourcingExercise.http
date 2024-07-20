@@ -1,0 +1,6 @@
+@EventSourcingExercise_HostAddress = http://localhost:5041
+
+GET {{EventSourcingExercise_HostAddress}}/_hc/
+Accept: application/json
+
+###
