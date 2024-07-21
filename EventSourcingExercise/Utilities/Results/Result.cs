@@ -2,6 +2,11 @@
 
 public class Result
 {
+    private static readonly Result SuccessResult = new()
+    {
+        Code = "Success",
+    };
+
     protected Result()
     {
     }
@@ -12,10 +17,7 @@ public class Result
 
     public static Result Success()
     {
-        return new Result
-        {
-            Code = "Success",
-        };
+        return SuccessResult;
     }
 
     public static Result Fail(string code)
