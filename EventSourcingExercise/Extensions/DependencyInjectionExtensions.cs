@@ -12,7 +12,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IThirdPartyGateway, ThirdPartyGateway>();
-        services.AddScoped<IIdGenerator<long>, NumberIdGenerator>();
+        services.AddScoped<IIdGenerator<long>>(_ => new NumberIdGenerator(0));
 
         return services;
     }

@@ -1,4 +1,4 @@
-﻿using EventSourcingExercise.Transactions.Domains.Pays;
+﻿using EventSourcingExercise.Transactions.Applications.Pays;
 
 namespace EventSourcingExercise.Transactions.ApiModels.Pays;
 

@@ -1,6 +1,5 @@
 ﻿using EventSourcingExercise.Transactions.Applications.ThirdPartyGateways;
 using EventSourcingExercise.Transactions.Domains;
-using EventSourcingExercise.Transactions.Domains.Pays;
 using EventSourcingExercise.Utilities.IdGenerators;
 using EventSourcingExercise.Utilities.Results;
 using MediatR;
