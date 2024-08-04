@@ -1,6 +1,7 @@
-﻿using EventSourcingExercise.Transactions.Applications;
+﻿using EventSourcingExercise.Cores;
+using EventSourcingExercise.Infrastructures;
+using EventSourcingExercise.Infrastructures.IdGenerators;
 using EventSourcingExercise.Transactions.Applications.ThirdPartyGateways;
-using EventSourcingExercise.Transactions.Infrastructures;
 using EventSourcingExercise.Utilities.IdGenerators;
 
 namespace EventSourcingExercise.Extensions;
@@ -9,10 +10,11 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<TimeProvider>(_ => TimeProvider.System);
+        services.AddScoped<AggregationStoreBase, MemoryAggregationStore>();
         services.AddScoped<IThirdPartyGateway, ThirdPartyGateway>();
-        services.AddScoped<IIdGenerator<long>>(_ => new NumberIdGenerator(0));
+        services.AddScoped<INumberIdGenerator>(_ => new NumberIdGenerator(0));
+        services.AddScoped<ITextIdGenerator, TextIdGenerator>();
 
         return services;
     }

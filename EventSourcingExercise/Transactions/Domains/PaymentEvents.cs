@@ -1,8 +1,10 @@
-﻿namespace EventSourcingExercise.Transactions.Domains;
+﻿using EventSourcingExercise.Cores;
+
+namespace EventSourcingExercise.Transactions.Domains;
 
 public static class PaymentEvents
 {
-    public record NewPaymentStarted(long Id, decimal Amount)
+    public record NewPaymentStarted(string Id, decimal Amount)
     {
         public EnumPaymentStatus Status => EnumPaymentStatus.Pending;
     }

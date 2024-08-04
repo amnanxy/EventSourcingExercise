@@ -3,18 +3,18 @@ using static EventSourcingExercise.Transactions.Domains.PaymentEvents;
 
 namespace EventSourcingExercise.Transactions.Domains;
 
-public class Payment : AggregateRoot<long>
+public class Payment : AggregateRoot
 {
     public decimal Amount { get; private set; }
 
     public EnumPaymentStatus Status { get; private set; }
 
-    private Payment(long id, decimal amount)
+    private Payment(string id, decimal amount)
     {
         Apply(new NewPaymentStarted(id, amount));
     }
 
-    public static Payment StartNewPayment(long id, decimal amount)
+    public static Payment StartNewPayment(string id, decimal amount)
     {
         return new Payment(id, amount);
     }
@@ -27,11 +27,6 @@ public class Payment : AggregateRoot<long>
     public void PayFailed()
     {
         Apply(new PaymentFailed());
-    }
-
-    private void Apply(object evt)
-    {
-        When(evt);
     }
 
     protected override void When(object @event)
@@ -50,7 +45,8 @@ public class Payment : AggregateRoot<long>
                 Status = evt.Status;
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(@event), $"event type: {@event}");
+                RaiseEventOutOfRange(@event);
+                break;
         }
     }
 }

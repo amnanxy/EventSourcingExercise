@@ -2,23 +2,27 @@
 
 public class Result<T> : Result
 {
+    private Result()
+    {
+    }
+
     public T? Data { get; init; }
     
     public static Result<T> Success(T data)
     {
         return new Result<T>
         {
-            Data = data,
             Code = "Success",
+            Data = data,
         };
     }
 
-    public static Result<T?> Fail(string code, T? data = default)
+    public static Result<T> Fail(string code, T? data = default)
     {
-        return new Result<T?>
+        return new Result<T>
         {
-            Data = data,
             Code = code,
+            Data = data,
         };
     }
 

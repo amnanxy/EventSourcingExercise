@@ -1,6 +1,6 @@
 ﻿namespace EventSourcingExercise.Utilities.IdGenerators;
 
-public interface IIdGenerator<out T>
+public interface INumberIdGenerator
 {
-    T CreateId();
+    long CreateId();
 }

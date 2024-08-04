@@ -1,8 +1,9 @@
-﻿using IdGen;
+﻿using EventSourcingExercise.Utilities.IdGenerators;
+using IdGen;
 
-namespace EventSourcingExercise.Utilities.IdGenerators;
+namespace EventSourcingExercise.Infrastructures.IdGenerators;
 
-public class NumberIdGenerator : IIdGenerator<long>
+public class NumberIdGenerator : INumberIdGenerator
 {
     private readonly IdGenerator _idGenerator;
 
