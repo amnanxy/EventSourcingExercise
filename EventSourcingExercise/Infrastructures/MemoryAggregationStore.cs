@@ -11,11 +11,13 @@ public class MemoryAggregationStore : AggregationStoreBase
     private static readonly List<EventData> EventDataSet = [];
     private readonly TimeProvider _timeProvider;
     private readonly INumberIdGenerator _numberIdGenerator;
+    private readonly EventTypeMapper _eventTypeMapper;
 
-    public MemoryAggregationStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator)
+    public MemoryAggregationStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator, EventTypeMapper eventTypeMapper)
     {
         _timeProvider = timeProvider;
         _numberIdGenerator = numberIdGenerator;
+        _eventTypeMapper = eventTypeMapper;
     }
 
     protected override Task InternalCommit(IReadOnlyList<string> newEntityIds, IReadOnlyDictionary<string, IReadOnlyList<object>> newEvents)
@@ -36,7 +38,8 @@ public class MemoryAggregationStore : AggregationStoreBase
             var eventStream = EventStreams[streamId];
             foreach (var evt in events)
             {
-                var eventMetadata = new EventData(eventStream.StreamId, ++eventStream.Version, JsonSerializer.Serialize(evt), evt.GetType(), _timeProvider.GetUtcNow());
+                var eventName = _eventTypeMapper[evt.GetType()];
+                var eventMetadata = new EventData(eventStream.StreamId, ++eventStream.Version, JsonSerializer.Serialize(evt), eventName, _timeProvider.GetUtcNow());
                 EventDataSet.Add(eventMetadata);
             }
         }
@@ -49,12 +52,12 @@ public class MemoryAggregationStore : AggregationStoreBase
         if (EntityIdToStreamIdMapping.TryGetValue(entityId, out var streamId))
         {
             var events = EventDataSet.Where(t => t.StreamId == streamId)
-                .Select(t => JsonSerializer.Deserialize(t.EventText, t.EventType)!)
+                .Select(t => JsonSerializer.Deserialize(t.EventText, _eventTypeMapper[t.EventName])!)
                 .ToArray();
 
             return Task.FromResult<IReadOnlyList<object>>(events);
         }
 
-        return Task.FromResult<IReadOnlyList<object>>(Array.Empty<object>());
+        return Task.FromResult<IReadOnlyList<object>>([]);
     }
 }

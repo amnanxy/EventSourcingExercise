@@ -20,6 +20,7 @@ builder.Services.AddHealthChecks();
 builder.Services.AddTransient(typeof(IRequestHandler<,>), typeof(EntityHandler<>));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddServices();
+builder.Services.AddEventTypeMapper();
 
 var app = builder.Build();
 

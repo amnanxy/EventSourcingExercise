@@ -14,7 +14,7 @@ public class OperationController : CommonControllerBase
     }
 
     [HttpGet]
-    [Route("{entityId}")]
+    [Route("payment/{entityId}")]
     public async Task<object> GetEntity(
         [FromRoute] string entityId,
         CancellationToken token)

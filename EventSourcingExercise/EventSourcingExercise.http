@@ -17,4 +17,4 @@ Content-Type: application/json
 %}
 
 ### step02 - Query Entity
-GET {{EventSourcingExercise_HostAddress}}/operation/{{entityId}}
+GET {{EventSourcingExercise_HostAddress}}/operation/payment/{{entityId}}
