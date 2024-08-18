@@ -22,6 +22,14 @@ public abstract class AggregateRoot
         _events.Add(evt);
     }
 
+    internal void Load(IEnumerable<object> events)
+    {
+        foreach (var evt in events)
+        {
+            When(evt);
+        }
+    }
+
     protected abstract void When(object @event);
 
     protected static void RaiseEventOutOfRange(object evt)

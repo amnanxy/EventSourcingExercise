@@ -4,7 +4,7 @@
 GET {{EventSourcingExercise_HostAddress}}/_hc/
 Accept: application/json
 
-### Payment successful
+### step01 - Payment successful
 POST {{EventSourcingExercise_HostAddress}}/transaction/pay
 Accept: application/json
 Content-Type: application/json
@@ -12,3 +12,9 @@ Content-Type: application/json
 {
   "Amount": 5
 }
+> {%
+    client.global.set("entityId", response.body.data.transactionId);
+%}
+
+### step02 - Query Entity
+GET {{EventSourcingExercise_HostAddress}}/operation/{{entityId}}

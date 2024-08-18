@@ -22,8 +22,8 @@ public abstract class AggregationStoreBase
         aggregateRoot.ClearEvents();
 
         _newEvents[aggregateRoot.Id] = _newEvents.TryGetValue(aggregateRoot.Id, out var value)
-            ? [value, events]
-            : [events];
+            ? [..value, ..events]
+            : [..events];
     }
 
     public async Task Commit()
@@ -36,4 +36,20 @@ public abstract class AggregationStoreBase
     }
 
     protected abstract Task InternalCommit(IReadOnlyList<string> newEntityIds, IReadOnlyDictionary<string, IReadOnlyList<object>> newEvents);
+
+    public async Task<TEntity?> Get<TEntity>(string entityId)
+        where TEntity : AggregateRoot, IEntityCreator<TEntity>
+    {
+        var events = await GetStreamEvents(entityId);
+        if (events.Count == 0)
+        {
+            return null;
+        }
+
+        var entity = TEntity.Create();
+        entity.Load(events);
+        return entity;
+    }
+
+    protected abstract Task<IReadOnlyList<object>> GetStreamEvents(string entityId);
 }

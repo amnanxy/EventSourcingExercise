@@ -8,9 +8,9 @@ public class MemoryAggregationStore : AggregationStoreBase
 {
     private static readonly Dictionary<string, long> EntityIdToStreamIdMapping = new();
     private static readonly Dictionary<long, EventStream> EventStreams = new();
+    private static readonly List<EventData> EventDataSet = [];
     private readonly TimeProvider _timeProvider;
     private readonly INumberIdGenerator _numberIdGenerator;
-    private readonly List<EventData> _eventMetadataSet = [];
 
     public MemoryAggregationStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator)
     {
@@ -37,10 +37,24 @@ public class MemoryAggregationStore : AggregationStoreBase
             foreach (var evt in events)
             {
                 var eventMetadata = new EventData(eventStream.StreamId, ++eventStream.Version, JsonSerializer.Serialize(evt), evt.GetType(), _timeProvider.GetUtcNow());
-                _eventMetadataSet.Add(eventMetadata);
+                EventDataSet.Add(eventMetadata);
             }
         }
 
         return Task.CompletedTask;
+    }
+
+    protected override Task<IReadOnlyList<object>> GetStreamEvents(string entityId)
+    {
+        if (EntityIdToStreamIdMapping.TryGetValue(entityId, out var streamId))
+        {
+            var events = EventDataSet.Where(t => t.StreamId == streamId)
+                .Select(t => JsonSerializer.Deserialize(t.EventText, t.EventType)!)
+                .ToArray();
+
+            return Task.FromResult<IReadOnlyList<object>>(events);
+        }
+
+        return Task.FromResult<IReadOnlyList<object>>(Array.Empty<object>());
     }
 }

@@ -6,13 +6,10 @@ namespace EventSourcingExercise.Controllers;
 
 [ApiController]
 [Route("transaction")]
-public class TransactionController : ControllerBase
+public class TransactionController : CommonControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public TransactionController(IMediator mediator)
+    public TransactionController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     [HttpPost]
@@ -22,6 +19,6 @@ public class TransactionController : ControllerBase
         CancellationToken token)
     {
         var command = request.ToCommand();
-        return await _mediator.Send(command, token);
+        return await Mediator.Send(command, token);
     }
 }

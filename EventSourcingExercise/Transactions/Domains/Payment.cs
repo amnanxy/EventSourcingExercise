@@ -3,15 +3,24 @@ using static EventSourcingExercise.Transactions.Domains.PaymentEvents;
 
 namespace EventSourcingExercise.Transactions.Domains;
 
-public class Payment : AggregateRoot
+public class Payment : AggregateRoot, IEntityCreator<Payment>
 {
     public decimal Amount { get; private set; }
 
     public EnumPaymentStatus Status { get; private set; }
 
+    private Payment()
+    {
+    }
+
     private Payment(string id, decimal amount)
     {
         Apply(new NewPaymentStarted(id, amount));
+    }
+
+    public static Payment Create()
+    {
+        return new Payment();
     }
 
     public static Payment StartNewPayment(string id, decimal amount)

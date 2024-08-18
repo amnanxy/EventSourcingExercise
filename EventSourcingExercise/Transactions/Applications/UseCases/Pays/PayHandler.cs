@@ -5,7 +5,7 @@ using EventSourcingExercise.Utilities.IdGenerators;
 using EventSourcingExercise.Utilities.Results;
 using MediatR;
 
-namespace EventSourcingExercise.Transactions.Applications.Pays;
+namespace EventSourcingExercise.Transactions.Applications.UseCases.Pays;
 
 public class PayHandler : IRequestHandler<PayCommand, Result<PayResult?>>
 {

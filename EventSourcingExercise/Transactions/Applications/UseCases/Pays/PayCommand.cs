@@ -1,7 +1,7 @@
 ﻿using EventSourcingExercise.Utilities.Results;
 using MediatR;
 
-namespace EventSourcingExercise.Transactions.Applications.Pays;
+namespace EventSourcingExercise.Transactions.Applications.UseCases.Pays;
 
 public class PayCommand : IRequest<Result<PayResult?>>
 {

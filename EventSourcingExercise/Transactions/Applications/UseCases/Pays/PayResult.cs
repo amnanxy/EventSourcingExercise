@@ -1,4 +1,4 @@
-﻿namespace EventSourcingExercise.Transactions.Applications.Pays;
+﻿namespace EventSourcingExercise.Transactions.Applications.UseCases.Pays;
 
 public class PayResult
 {
