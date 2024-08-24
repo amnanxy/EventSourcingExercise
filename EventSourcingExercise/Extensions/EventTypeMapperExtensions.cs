@@ -11,6 +11,7 @@ public static class EventTypeMapperExtensions
         eventTypeMapper.Add("NewPaymentStarted", typeof(PaymentEvents.NewPaymentStarted));
         eventTypeMapper.Add("PaymentSucceeded", typeof(PaymentEvents.PaymentSucceeded));
         eventTypeMapper.Add("PaymentFailed", typeof(PaymentEvents.PaymentFailed));
+        eventTypeMapper.Add("CaptureAccepted", typeof(PaymentEvents.CaptureAccepted));
 
         services.AddSingleton(eventTypeMapper);
         return services;

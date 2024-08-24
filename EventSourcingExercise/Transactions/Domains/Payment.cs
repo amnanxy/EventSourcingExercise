@@ -1,13 +1,29 @@
 ﻿using EventSourcingExercise.Cores;
+using EventSourcingExercise.Transactions.Domains.Enums;
 using static EventSourcingExercise.Transactions.Domains.PaymentEvents;
 
 namespace EventSourcingExercise.Transactions.Domains;
 
 public class Payment : AggregateRoot, IEntityCreator<Payment>
 {
+    private EnumPaymentStatus _status;
+
+    public List<Capture> Captures { get; } = [];
+
     public decimal Amount { get; private set; }
 
-    public EnumPaymentStatus Status { get; private set; }
+    public EnumPaymentStatus Status
+    {
+        get
+        {
+            if (Captures.Count != 0)
+            {
+                return EnumPaymentStatus.Capturing;
+            }
+
+            return _status;
+        }
+    }
 
     private Payment()
     {
@@ -38,6 +54,14 @@ public class Payment : AggregateRoot, IEntityCreator<Payment>
         Apply(new PaymentFailed());
     }
 
+    public void AcceptCapture(string captureId)
+    {
+        Apply(new CaptureAccepted
+        {
+            CaptureId = captureId,
+        });
+    }
+
     protected override void When(object @event)
     {
         switch (@event)
@@ -45,13 +69,20 @@ public class Payment : AggregateRoot, IEntityCreator<Payment>
             case NewPaymentStarted evt:
                 Id = evt.Id;
                 Amount = evt.Amount;
-                Status = evt.Status;
+                _status = evt.Status;
                 break;
             case PaymentSucceeded evt:
-                Status = evt.Status;
+                _status = evt.Status;
                 break;
             case PaymentFailed evt:
-                Status = evt.Status;
+                _status = evt.Status;
+                break;
+            case CaptureAccepted evt:
+                Captures.Add(new Capture
+                {
+                    CaptureId = evt.CaptureId,
+                    Status = EnumCaptureStatus.Accepted,
+                });
                 break;
             default:
                 RaiseEventOutOfRange(@event);

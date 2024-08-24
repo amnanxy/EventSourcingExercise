@@ -1,3 +1,4 @@
+using EventSourcingExercise.Transactions.ApiModels.Captures;
 using EventSourcingExercise.Transactions.ApiModels.Pays;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,16 @@ public class TransactionController : CommonControllerBase
     [Route("pay")]
     public async Task<object> Pay(
         [FromBody] PayRequest request,
+        CancellationToken token)
+    {
+        var command = request.ToCommand();
+        return await Mediator.Send(command, token);
+    }
+    
+    [HttpPost]
+    [Route("capture")]
+    public async Task<object> Capture(
+        [FromBody] CaptureRequest request,
         CancellationToken token)
     {
         var command = request.ToCommand();
