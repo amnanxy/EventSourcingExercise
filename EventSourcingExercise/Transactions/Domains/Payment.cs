@@ -7,8 +7,9 @@ namespace EventSourcingExercise.Transactions.Domains;
 public class Payment : AggregateRoot, IEntityCreator<Payment>
 {
     private EnumPaymentStatus _status;
+    private readonly List<Capture> _captures = [];
 
-    public List<Capture> Captures { get; } = [];
+    public IReadOnlyList<Capture> Captures => _captures;
 
     public decimal Amount { get; private set; }
 
@@ -29,12 +30,12 @@ public class Payment : AggregateRoot, IEntityCreator<Payment>
     {
     }
 
-    private Payment(string id, decimal amount)
+    private Payment(string paymentId, decimal amount)
     {
-        Apply(new NewPaymentStarted(id, amount));
+        Apply(new NewPaymentStarted(paymentId, amount));
     }
 
-    public static Payment Create()
+    static Payment IEntityCreator<Payment>.Create()
     {
         return new Payment();
     }
@@ -56,36 +57,28 @@ public class Payment : AggregateRoot, IEntityCreator<Payment>
 
     public void AcceptCapture(string captureId)
     {
-        Apply(new CaptureAccepted
-        {
-            CaptureId = captureId,
-        });
+        Apply(new CaptureAccepted(captureId, Amount));
     }
 
-    protected override void When(object @event)
+    protected override void When(object evt)
     {
-        switch (@event)
+        switch (evt)
         {
-            case NewPaymentStarted evt:
-                Id = evt.Id;
-                Amount = evt.Amount;
-                _status = evt.Status;
+            case NewPaymentStarted e:
+                Id = e.PaymentId;
+                Amount = e.Amount;
+                _status = EnumPaymentStatus.PaymentPending;
                 break;
-            case PaymentSucceeded evt:
-                _status = evt.Status;
+            case PaymentSucceeded:
+                _status = EnumPaymentStatus.PaymentSuccess;
                 break;
-            case PaymentFailed evt:
-                _status = evt.Status;
+            case PaymentFailed:
+                _status = EnumPaymentStatus.PaymentFailure;
                 break;
-            case CaptureAccepted evt:
-                Captures.Add(new Capture
-                {
-                    CaptureId = evt.CaptureId,
-                    Status = EnumCaptureStatus.Accepted,
-                });
-                break;
-            default:
-                RaiseEventOutOfRange(@event);
+            case CaptureAccepted e:
+                var capture = new Capture(Apply);
+                ApplyToEntity(capture, e);
+                _captures.Add(capture);
                 break;
         }
     }

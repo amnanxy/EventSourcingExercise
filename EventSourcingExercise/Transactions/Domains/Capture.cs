@@ -1,10 +1,28 @@
-﻿using EventSourcingExercise.Transactions.Domains.Enums;
+﻿using EventSourcingExercise.Cores;
+using EventSourcingExercise.Transactions.Domains.Enums;
+using static EventSourcingExercise.Transactions.Domains.PaymentEvents;
 
 namespace EventSourcingExercise.Transactions.Domains;
 
-public class Capture
+public class Capture : EntityBase
 {
-    public required string CaptureId { get; init; }
+    public decimal Amount { get; private set; }
 
-    public EnumCaptureStatus Status { get; init; }
+    public EnumCaptureStatus Status { get; private set; }
+
+    public Capture(Action<object> applier) : base(applier)
+    {
+    }
+
+    protected override void When(object evt)
+    {
+        switch (evt)
+        {
+            case CaptureAccepted ev:
+                Id = ev.CaptureId;
+                Status = EnumCaptureStatus.Accepted;
+                Amount = ev.Amount;
+                break;
+        }
+    }
 }

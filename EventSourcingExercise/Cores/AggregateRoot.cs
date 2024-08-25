@@ -1,20 +1,14 @@
 ﻿namespace EventSourcingExercise.Cores;
 
-public abstract class AggregateRoot
+public abstract class AggregateRoot : IInternalEventHandler
 {
     public string Id { get; protected set; } = default!;
 
     private readonly List<object> _events = [];
 
-    public IReadOnlyList<object> GetEvents()
-    {
-        return _events.ToArray();
-    }
+    public IReadOnlyList<object> GetEvents() => _events.ToArray();
 
-    public void ClearEvents()
-    {
-        _events.Clear();
-    }
+    public void ClearEvents() => _events.Clear();
 
     protected void Apply(object evt)
     {
@@ -30,10 +24,12 @@ public abstract class AggregateRoot
         }
     }
 
-    protected abstract void When(object @event);
+    protected abstract void When(object evt);
 
-    protected static void RaiseEventOutOfRange(object evt)
+    protected void ApplyToEntity(IInternalEventHandler entity, object evt)
     {
-        throw new ArgumentOutOfRangeException(nameof(evt), $"event type: {evt}");
+        entity.Handle(evt);
     }
+
+    void IInternalEventHandler.Handle(object evt) => When(evt);
 }

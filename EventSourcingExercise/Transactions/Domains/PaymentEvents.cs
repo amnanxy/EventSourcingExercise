@@ -5,25 +5,11 @@ namespace EventSourcingExercise.Transactions.Domains;
 
 public static class PaymentEvents
 {
-    public record NewPaymentStarted(string Id, decimal Amount)
-    {
-        public EnumPaymentStatus Status => EnumPaymentStatus.Pending;
-    }
+    public record NewPaymentStarted(string PaymentId, decimal Amount);
 
-    public record PaymentFailed
-    {
-        public EnumPaymentStatus Status => EnumPaymentStatus.PaymentFailure;
-    }
+    public record PaymentFailed;
 
-    public record PaymentSucceeded
-    {
-        public EnumPaymentStatus Status => EnumPaymentStatus.PaymentSuccess;
-    }
+    public record PaymentSucceeded;
 
-    public record CaptureAccepted
-    {
-        public required string CaptureId { get; set; }
-
-        public EnumCaptureStatus Status => EnumCaptureStatus.Accepted;
-    }
+    public record CaptureAccepted(string CaptureId, decimal Amount);
 }
