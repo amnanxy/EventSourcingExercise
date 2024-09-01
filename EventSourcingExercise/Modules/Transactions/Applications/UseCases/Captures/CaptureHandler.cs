@@ -9,17 +9,17 @@ namespace EventSourcingExercise.Modules.Transactions.Applications.UseCases.Captu
 public class CaptureHandler : IRequestHandler<CaptureCommand, Result<CaptureResult?>>
 {
     private readonly ITextIdGenerator _idGenerator;
-    private readonly AggregationStoreBase _aggregationStore;
+    private readonly AggregateStoreBase _aggregateStore;
 
-    public CaptureHandler(ITextIdGenerator idGenerator, AggregationStoreBase aggregationStore)
+    public CaptureHandler(ITextIdGenerator idGenerator, AggregateStoreBase aggregateStore)
     {
         _idGenerator = idGenerator;
-        _aggregationStore = aggregationStore;
+        _aggregateStore = aggregateStore;
     }
 
     public async Task<Result<CaptureResult?>> Handle(CaptureCommand request, CancellationToken cancellationToken)
     {
-        var payment = await _aggregationStore.Get<Payment>(request.TransactionId);
+        var payment = await _aggregateStore.Get<Payment>(request.TransactionId);
 
         if (payment == null)
         {
@@ -30,9 +30,9 @@ public class CaptureHandler : IRequestHandler<CaptureCommand, Result<CaptureResu
 
         payment.AcceptCapture(captureId);
 
-        _aggregationStore.Update(payment);
+        _aggregateStore.Update(payment);
 
-        await _aggregationStore.Commit();
+        await _aggregateStore.Commit();
 
         return Result<CaptureResult?>.Success(new CaptureResult
         {

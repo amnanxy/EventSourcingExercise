@@ -17,7 +17,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
-builder.Services.AddTransient(typeof(IRequestHandler<,>), typeof(EntityHandler<>));
+builder.Services.AddTransient(typeof(IRequestHandler<,>), typeof(AggregateHandler<>));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddServices();
 builder.Services.AddEventTypeMapper();

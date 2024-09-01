@@ -11,7 +11,7 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<TimeProvider>(_ => TimeProvider.System);
-        services.AddScoped<AggregationStoreBase, MemoryAggregationStore>();
+        services.AddScoped<AggregateStoreBase, MemoryAggregateStore>();
         services.AddScoped<IThirdPartyGateway, ThirdPartyGateway>();
         services.AddScoped<INumberIdGenerator>(_ => new NumberIdGenerator(0));
         services.AddScoped<ITextIdGenerator, TextIdGenerator>();

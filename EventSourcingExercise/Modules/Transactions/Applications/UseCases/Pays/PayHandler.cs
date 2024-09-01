@@ -10,16 +10,16 @@ namespace EventSourcingExercise.Modules.Transactions.Applications.UseCases.Pays;
 public class PayHandler : IRequestHandler<PayCommand, Result<PayResult?>>
 {
     private readonly ITextIdGenerator _idGenerator;
-    private readonly AggregationStoreBase _aggregationStore;
+    private readonly AggregateStoreBase _aggregateStore;
     private readonly IThirdPartyGateway _thirdPartyGateway;
 
     public PayHandler(
         ITextIdGenerator idGenerator,
-        AggregationStoreBase aggregationStore,
+        AggregateStoreBase aggregateStore,
         IThirdPartyGateway thirdPartyGateway)
     {
         _idGenerator = idGenerator;
-        _aggregationStore = aggregationStore;
+        _aggregateStore = aggregateStore;
         _thirdPartyGateway = thirdPartyGateway;
     }
 
@@ -27,15 +27,15 @@ public class PayHandler : IRequestHandler<PayCommand, Result<PayResult?>>
     {
         var payment = Payment.StartNewPayment(_idGenerator.CreateId("PA", 12), request.Amount);
 
-        _aggregationStore.Add(payment);
+        _aggregateStore.Add(payment);
 
-        await _aggregationStore.Commit();
+        await _aggregateStore.Commit();
 
         var result = await ProcessPayment(payment);
 
-        _aggregationStore.Update(payment);
+        _aggregateStore.Update(payment);
 
-        await _aggregationStore.Commit();
+        await _aggregateStore.Commit();
 
         if (result.IsSuccess)
         {

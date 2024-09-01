@@ -25,5 +25,5 @@ Content-Type: application/json
   "transactionId": "{{transactionId}}"
 }
 
-### Operation - Query Entity
+### Operation - Query Payment Aggregate
 GET {{EventSourcingExercise_HostAddress}}/operation/payment/{{transactionId}}

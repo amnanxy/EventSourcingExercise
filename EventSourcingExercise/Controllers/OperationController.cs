@@ -14,14 +14,14 @@ public class OperationController : CommonControllerBase
     }
 
     [HttpGet]
-    [Route("payment/{entityId}")]
-    public async Task<object> GetEntity(
-        [FromRoute] string entityId,
+    [Route("payment/{aggregateId}")]
+    public async Task<object> GetPayment(
+        [FromRoute] string aggregateId,
         CancellationToken token)
     {
-        return await Mediator.Send(new EntityQuery<Payment>
+        return await Mediator.Send(new AggregateQuery<Payment>
         {
-            EntityId = entityId,
+            AggregateId = aggregateId,
         } , token);
     }
 }

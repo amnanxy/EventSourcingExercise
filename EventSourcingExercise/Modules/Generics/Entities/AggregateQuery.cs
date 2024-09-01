@@ -4,8 +4,8 @@ using MediatR;
 
 namespace EventSourcingExercise.Modules.Generics.Entities;
 
-public class EntityQuery<T> : IRequest<Result<T?>>
-    where T : AggregateRoot, IEntityCreator<T>
+public class AggregateQuery<T> : IRequest<Result<T?>>
+    where T : AggregateRoot, IAggregateCreator<T>
 {
-    public required string EntityId { get; init; }
+    public required string AggregateId { get; init; }
 }
