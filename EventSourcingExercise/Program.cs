@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac.Extensions.DependencyInjection;
 using EventSourcingExercise.Extensions;
-using EventSourcingExercise.Generics.Entities;
+using EventSourcingExercise.Modules.Generics.Entities;
 using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);

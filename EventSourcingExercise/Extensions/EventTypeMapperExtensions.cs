@@ -1,5 +1,5 @@
 ﻿using EventSourcingExercise.Infrastructures;
-using EventSourcingExercise.Transactions.Domains;
+using EventSourcingExercise.Modules.Transactions.Domains;
 
 namespace EventSourcingExercise.Extensions;
 

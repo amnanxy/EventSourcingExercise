@@ -1,7 +1,7 @@
 ﻿using EventSourcingExercise.Cores;
 using EventSourcingExercise.Infrastructures;
 using EventSourcingExercise.Infrastructures.IdGenerators;
-using EventSourcingExercise.Transactions.Applications.ThirdPartyGateways;
+using EventSourcingExercise.Modules.Transactions.Applications.ThirdPartyGateways;
 using EventSourcingExercise.Utilities.IdGenerators;
 
 namespace EventSourcingExercise.Extensions;

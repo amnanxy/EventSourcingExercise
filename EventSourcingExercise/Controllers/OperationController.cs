@@ -1,5 +1,5 @@
-using EventSourcingExercise.Generics.Entities;
-using EventSourcingExercise.Transactions.Domains;
+using EventSourcingExercise.Modules.Generics.Entities;
+using EventSourcingExercise.Modules.Transactions.Domains;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

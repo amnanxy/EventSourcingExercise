@@ -1,5 +1,5 @@
-using EventSourcingExercise.Transactions.ApiModels.Captures;
-using EventSourcingExercise.Transactions.ApiModels.Pays;
+using EventSourcingExercise.ApiModels.Transactions.Captures;
+using EventSourcingExercise.ApiModels.Transactions.Pays;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
