@@ -4,7 +4,7 @@ using static EventSourcingExercise.Modules.Transactions.Domains.PaymentEvents;
 
 namespace EventSourcingExercise.Modules.Transactions.Domains;
 
-public class Payment : AggregateRoot, IAggregateCreator<Payment>
+public class Payment : AggregateRoot
 {
     private EnumPaymentStatus _status;
     private readonly List<Capture> _captures = [];
@@ -33,11 +33,6 @@ public class Payment : AggregateRoot, IAggregateCreator<Payment>
     private Payment(string paymentId, decimal amount)
     {
         Apply(new NewPaymentStarted(paymentId, amount));
-    }
-
-    static Payment IAggregateCreator<Payment>.Create()
-    {
-        return new Payment();
     }
 
     public static Payment StartNewPayment(string id, decimal amount)

@@ -8,7 +8,9 @@ public abstract class AggregateRoot : IInternalEventHandler
 
     public IReadOnlyList<object> GetEvents() => _events.ToArray();
 
-    public void ClearEvents() => _events.Clear();
+    internal int EventCount => _events.Count;
+
+    internal void ClearEvents() => _events.Clear();
 
     protected void Apply(object evt)
     {

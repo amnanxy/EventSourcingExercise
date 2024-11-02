@@ -5,7 +5,7 @@ using MediatR;
 namespace EventSourcingExercise.Modules.Generics.Entities;
 
 public class AggregateQuery<T> : IRequest<Result<T?>>
-    where T : AggregateRoot, IAggregateCreator<T>
+    where T : AggregateRoot
 {
     public required string AggregateId { get; init; }
 }

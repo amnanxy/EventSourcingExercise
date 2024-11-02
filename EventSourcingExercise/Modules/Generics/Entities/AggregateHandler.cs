@@ -5,7 +5,7 @@ using MediatR;
 namespace EventSourcingExercise.Modules.Generics.Entities;
 
 public class AggregateHandler<T> : IRequestHandler<AggregateQuery<T>, Result<T?>>
-    where T : AggregateRoot, IAggregateCreator<T>
+    where T : AggregateRoot
 {
     private readonly AggregateStoreBase _aggregateStore;
 

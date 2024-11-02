@@ -7,13 +7,14 @@ public static class EventTypeMapperExtensions
 {
     public static IServiceCollection AddEventTypeMapper(this IServiceCollection services)
     {
-        var eventTypeMapper = new EventTypeMapper();
-        eventTypeMapper.Add("NewPaymentStarted", typeof(PaymentEvents.NewPaymentStarted));
-        eventTypeMapper.Add("PaymentSucceeded", typeof(PaymentEvents.PaymentSucceeded));
-        eventTypeMapper.Add("PaymentFailed", typeof(PaymentEvents.PaymentFailed));
-        eventTypeMapper.Add("CaptureAccepted", typeof(PaymentEvents.CaptureAccepted));
+        var typeMapper = new TypeMapper();
+        typeMapper.AddAggregateRoot("Payment", typeof(Payment));
+        typeMapper.AddEvent("NewPaymentStarted", typeof(PaymentEvents.NewPaymentStarted));
+        typeMapper.AddEvent("PaymentSucceeded", typeof(PaymentEvents.PaymentSucceeded));
+        typeMapper.AddEvent("PaymentFailed", typeof(PaymentEvents.PaymentFailed));
+        typeMapper.AddEvent("CaptureAccepted", typeof(PaymentEvents.CaptureAccepted));
 
-        services.AddSingleton(eventTypeMapper);
+        services.AddSingleton(typeMapper);
         return services;
     }
 }

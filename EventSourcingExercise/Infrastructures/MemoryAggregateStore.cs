@@ -11,53 +11,68 @@ public class MemoryAggregateStore : AggregateStoreBase
     private static readonly List<EventData> EventDataSet = [];
     private readonly TimeProvider _timeProvider;
     private readonly INumberIdGenerator _numberIdGenerator;
-    private readonly EventTypeMapper _eventTypeMapper;
+    private readonly TypeMapper _typeMapper;
 
-    public MemoryAggregateStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator, EventTypeMapper eventTypeMapper)
+    public MemoryAggregateStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator, TypeMapper typeMapper)
     {
         _timeProvider = timeProvider;
         _numberIdGenerator = numberIdGenerator;
-        _eventTypeMapper = eventTypeMapper;
+        _typeMapper = typeMapper;
     }
 
-    protected override Task InternalCommit(IReadOnlyList<string> newAggregateIds, IReadOnlyDictionary<string, IReadOnlyList<object>> newEvents)
+    protected override Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
     {
-        foreach (var newAggregateId in newAggregateIds)
+        foreach (var aggregateItem in aggregateItems.Where(t => t.IsNewAggregate))
         {
             var streamId = _numberIdGenerator.CreateId();
-            AggregateIdToStreamIdMapping.Add(newAggregateId, streamId);
+            AggregateIdToStreamIdMapping.Add(aggregateItem.AggregateRoot.Id, streamId);
             EventStreams.Add(streamId, new EventStream
             {
                 StreamId = streamId,
+                AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
             });
         }
 
-        foreach (var (aggregateId, events) in newEvents)
+        var newEventDataSet = new List<EventData>();
+        foreach (var aggregateItem in aggregateItems)
         {
-            var streamId = AggregateIdToStreamIdMapping[aggregateId];
+            var streamId = AggregateIdToStreamIdMapping[aggregateItem.AggregateRoot.Id];
             var eventStream = EventStreams[streamId];
-            foreach (var evt in events)
+            foreach (var evt in aggregateItem.NewEvents)
             {
-                var eventName = _eventTypeMapper[evt.GetType()];
-                var eventMetadata = new EventData(eventStream.StreamId, ++eventStream.Version, JsonSerializer.Serialize(evt), eventName, _timeProvider.GetUtcNow());
-                EventDataSet.Add(eventMetadata);
+                var eventName = _typeMapper.GetEventName(evt.GetType());
+                var eventData = new EventData
+                {
+                    StreamId = eventStream.StreamId,
+                    Version = ++eventStream.Version,
+                    EventText = JsonSerializer.Serialize(evt),
+                    EventName = eventName,
+                    CreatedAt = _timeProvider.GetUtcNow(),
+                };
+                newEventDataSet.Add(eventData);
             }
         }
+
+        EventDataSet.AddRange(newEventDataSet);
 
         return Task.CompletedTask;
     }
 
-    protected override Task<IReadOnlyList<object>> GetStreamEvents(string aggregateId)
+    protected override Task<(object Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId)
     {
         if (AggregateIdToStreamIdMapping.TryGetValue(aggregateId, out var streamId))
         {
+            var eventStream = EventStreams[streamId];
+            var aggregateRootType = _typeMapper.GetAggregateRootType(eventStream.AggregateRootTypeName);
+            var aggregateRoot = Activator.CreateInstance(aggregateRootType, nonPublic: true);
+
             var events = EventDataSet.Where(t => t.StreamId == streamId)
-                .Select(t => JsonSerializer.Deserialize(t.EventText, _eventTypeMapper[t.EventName])!)
+                .Select(t => JsonSerializer.Deserialize(t.EventText, _typeMapper.GetEventType(t.EventName))!)
                 .ToArray();
 
-            return Task.FromResult<IReadOnlyList<object>>(events);
+            return Task.FromResult<(object, IReadOnlyList<object>)>((aggregateRoot, events)!);
         }
 
-        return Task.FromResult<IReadOnlyList<object>>([]);
+        return Task.FromResult<(object, IReadOnlyList<object>)>((null, [])!);
     }
 }

@@ -1,3 +1,14 @@
 ﻿namespace EventSourcingExercise.Infrastructures;
 
-public record EventData(long StreamId, long Version, string EventText, string EventName, DateTimeOffset CreatedAt);
+public class EventData
+{
+    public long StreamId { get; init; }
+
+    public long Version { get; init; }
+
+    public required string EventText { get; init; }
+
+    public required string EventName { get; init; }
+
+    public DateTimeOffset CreatedAt { get; init; }
+}
