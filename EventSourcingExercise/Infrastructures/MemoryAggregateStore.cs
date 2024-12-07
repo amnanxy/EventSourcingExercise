@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using EventSourcingExercise.Cores;
 using EventSourcingExercise.Utilities.IdGenerators;
+using MediatR;
 
 namespace EventSourcingExercise.Infrastructures;
 
@@ -12,15 +13,17 @@ public class MemoryAggregateStore : AggregateStoreBase
     private readonly TimeProvider _timeProvider;
     private readonly INumberIdGenerator _numberIdGenerator;
     private readonly TypeMapper _typeMapper;
+    private readonly IMediator _mediator;
 
-    public MemoryAggregateStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator, TypeMapper typeMapper)
+    public MemoryAggregateStore(TimeProvider timeProvider, INumberIdGenerator numberIdGenerator, TypeMapper typeMapper, IMediator mediator)
     {
         _timeProvider = timeProvider;
         _numberIdGenerator = numberIdGenerator;
         _typeMapper = typeMapper;
+        _mediator = mediator;
     }
 
-    protected override Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
+    protected override async Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
     {
         foreach (var aggregateItem in aggregateItems.Where(t => t.IsNewAggregate))
         {
@@ -55,7 +58,10 @@ public class MemoryAggregateStore : AggregateStoreBase
 
         EventDataSet.AddRange(newEventDataSet);
 
-        return Task.CompletedTask;
+        await _mediator.Publish(new EventsCreated
+        {
+            EventDataSet = newEventDataSet,
+        });
     }
 
     protected override Task<(object Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId)

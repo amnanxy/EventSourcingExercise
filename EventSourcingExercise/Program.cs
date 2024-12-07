@@ -4,9 +4,23 @@ using Autofac.Extensions.DependencyInjection;
 using EventSourcingExercise.Extensions;
 using EventSourcingExercise.Modules.Generics.Entities;
 using MediatR;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
+builder.Services.AddSerilog((services, lc) => lc
+    .ReadFrom.Configuration(builder.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
+
+builder.Host.UseOrleans(static siloBuilder =>
+{
+    siloBuilder.UseLocalhostClustering()
+        .AddMemoryStreams("StreamProvider")
+        .AddMemoryGrainStorage("PubSubStore");
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
