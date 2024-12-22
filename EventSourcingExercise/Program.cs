@@ -22,6 +22,11 @@ builder.Host.UseOrleans(static siloBuilder =>
         .AddMemoryGrainStorage("PubSubStore");
 });
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.UseMemoryDbContext();
+}
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

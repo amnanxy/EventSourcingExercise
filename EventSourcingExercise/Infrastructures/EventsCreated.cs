@@ -4,5 +4,5 @@ namespace EventSourcingExercise.Infrastructures;
 
 public class EventsCreated : INotification
 {
-    public required IReadOnlyList<EventData> EventDataSet { get; init; }
+    public required IReadOnlyList<EventEntry> EventDataSet { get; init; }
 }

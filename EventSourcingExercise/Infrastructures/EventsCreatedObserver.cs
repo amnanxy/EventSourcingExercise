@@ -16,7 +16,7 @@ public class EventsCreatedObserver : INotificationHandler<EventsCreated>
     {
         var streamProvider = _clusterClient.GetStreamProvider("StreamProvider");
         var id = StreamId.Create(ProjectorName.TransactionRecord, string.Empty);
-        var stream = streamProvider.GetStream<EventData>(id);
+        var stream = streamProvider.GetStream<EventEntry>(id);
 
         foreach (var eventData in notification.EventDataSet)
         {

@@ -53,7 +53,7 @@ public abstract class AggregateStoreBase
         }
 
         var (aggregateObj, events) = await GetStreamEvents(aggregateId);
-        if (events.Count == 0)
+        if (aggregateObj == null)
         {
             return null;
         }
@@ -64,7 +64,7 @@ public abstract class AggregateStoreBase
         return aggregate;
     }
 
-    protected abstract Task<(object Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId);
+    protected abstract Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId);
 
     protected record AggregateItem
     {

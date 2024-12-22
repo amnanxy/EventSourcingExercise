@@ -4,7 +4,7 @@ using Orleans.Streams.Core;
 namespace EventSourcingExercise.Infrastructures.Projectors;
 
 [ImplicitStreamSubscription(ProjectorName.TransactionRecord)]
-public class TransactionRecordProjector : Grain, IGrainWithStringKey, IStreamSubscriptionObserver, IAsyncObserver<EventData>
+public class TransactionRecordProjector : Grain, IGrainWithStringKey, IStreamSubscriptionObserver, IAsyncObserver<EventEntry>
 {
     private readonly ILogger<TransactionRecordProjector> _logger;
 
@@ -15,17 +15,17 @@ public class TransactionRecordProjector : Grain, IGrainWithStringKey, IStreamSub
 
     public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
     {
-        var handle = handleFactory.Create<EventData>();
+        var handle = handleFactory.Create<EventEntry>();
         await handle.ResumeAsync(this);
     }
 
-    public Task OnNextAsync(EventData item, StreamSequenceToken? token = null)
+    public Task OnNextAsync(EventEntry entry, StreamSequenceToken? token = null)
     {
         _logger.LogInformation("GrainId: {GrainId}, IdentityString: {IdentityString}, RuntimeIdentity: {RuntimeIdentity}, Item: {@Item}",
             this.GetGrainId().Key.Value,
             IdentityString,
             RuntimeIdentity,
-            item);
+            entry);
         return Task.CompletedTask;
     }
 
