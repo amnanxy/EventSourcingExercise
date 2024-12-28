@@ -1,4 +1,4 @@
-﻿namespace EventSourcingExercise.Infrastructures;
+﻿namespace EventSourcingExercise.Infrastructures.PersistenceModels;
 
 [GenerateSerializer]
 [Alias("EventSourcingExercise.Infrastructures.EventData")]

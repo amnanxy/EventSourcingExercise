@@ -1,4 +1,5 @@
-﻿using Orleans.Streams;
+﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+using Orleans.Streams;
 using Orleans.Streams.Core;
 
 namespace EventSourcingExercise.Infrastructures.Projectors;

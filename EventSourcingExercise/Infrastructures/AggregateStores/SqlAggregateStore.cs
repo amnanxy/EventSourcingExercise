@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using EventSourcingExercise.Cores;
+using EventSourcingExercise.Infrastructures.PersistenceModels;
 using EventSourcingExercise.Utilities.IdGenerators;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

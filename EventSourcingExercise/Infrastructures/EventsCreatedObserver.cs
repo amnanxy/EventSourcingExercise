@@ -1,4 +1,5 @@
-﻿using EventSourcingExercise.Infrastructures.Projectors;
+﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+using EventSourcingExercise.Infrastructures.Projectors;
 using MediatR;
 
 namespace EventSourcingExercise.Infrastructures;

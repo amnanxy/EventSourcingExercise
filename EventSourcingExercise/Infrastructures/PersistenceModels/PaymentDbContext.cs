@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EventSourcingExercise.Infrastructures;
+namespace EventSourcingExercise.Infrastructures.PersistenceModels;
 
 public class PaymentDbContext : DbContext
 {

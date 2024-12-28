@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+using MediatR;
 
 namespace EventSourcingExercise.Infrastructures;
 
