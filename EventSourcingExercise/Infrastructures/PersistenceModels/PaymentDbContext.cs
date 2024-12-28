@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EventSourcingExercise.Modules.Transactions.Domains.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventSourcingExercise.Infrastructures.PersistenceModels;
 
@@ -13,6 +14,8 @@ public class PaymentDbContext : DbContext
     public DbSet<EventEntry> EventEntries { get; init; }
 
     public DbSet<StreamIdMapping> StreamIdMappings { get; init; }
+
+    public DbSet<OutboxEntry> OutboxEntries { get; init; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,7 +37,7 @@ public class PaymentDbContext : DbContext
         {
             builder.HasKey(t => t.Id)
                 .HasName("pk_id");
-            
+
             builder.HasIndex(t => new { t.StreamId, t.Version })
                 .IsUnique()
                 .HasDatabaseName("uk_streamId_version");
@@ -71,5 +74,36 @@ public class PaymentDbContext : DbContext
 
             builder.Property(t => t.StreamId);
         });
+
+        modelBuilder.Entity<OutboxEntry>(builder =>
+        {
+            builder.HasKey(t => t.EventId)
+                .HasName("pk_eventId");
+
+            builder.HasIndex(t => new { t.CreatedAt })
+                .HasFilter($"status = '{EnumOutboxEntryStatus.Waiting}'")
+                .HasDatabaseName("ix_createdAt_filter");
+
+            builder.Property(t => t.Status);
+
+            builder.Property(t => t.CreatedAt);
+
+            builder.Property(t => t.DeliveredAt);
+        });
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder
+            .Properties<EnumPaymentStatus>()
+            .HaveConversion<string>();
+
+        configurationBuilder
+            .Properties<EnumCaptureStatus>()
+            .HaveConversion<string>();
+
+        configurationBuilder
+            .Properties<EnumOutboxEntryStatus>()
+            .HaveConversion<string>();
     }
 }

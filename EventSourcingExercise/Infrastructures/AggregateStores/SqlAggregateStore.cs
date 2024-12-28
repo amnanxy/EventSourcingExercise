@@ -67,13 +67,22 @@ public class SqlAggregateStore : AggregateStoreBase
             }
         }
 
+        var outboxEntries = newEventDataSet.Select(t => new OutboxEntry
+        {
+            EventId = t.Id,
+            Status = EnumOutboxEntryStatus.Waiting,
+            CreatedAt = t.CreatedAt,
+        }).ToArray();
+
         await _dbContext.EventEntries.AddRangeAsync(newEventDataSet);
+        await _dbContext.OutboxEntries.AddRangeAsync(outboxEntries);
 
         await _dbContext.SaveChangesAsync();
 
         await _mediator.Publish(new EventsCreated
         {
             EventDataSet = newEventDataSet,
+            OutboxEntries = outboxEntries,
         });
     }
 
