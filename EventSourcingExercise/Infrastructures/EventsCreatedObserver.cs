@@ -24,10 +24,10 @@ public class EventsCreatedObserver : INotificationHandler<EventsCreated>
         var id = StreamId.Create(ProjectorName.TransactionRecord, string.Empty);
         var stream = streamProvider.GetStream<EventEntry>(id);
 
-        foreach (var eventData in notification.EventDataSet)
+        foreach (var eventEntry in notification.EventEntries)
         {
-            await stream.OnNextAsync(eventData);
-            var outboxEntry = notification.OutboxEntries.Single(t => t.EventId == eventData.Id);
+            await stream.OnNextAsync(eventEntry);
+            var outboxEntry = notification.OutboxEntries.Single(t => t.EventId == eventEntry.Id);
             outboxEntry.Status = EnumOutboxEntryStatus.Delivered;
             outboxEntry.DeliveredAt = _timeProvider.GetUtcNow();
         }

@@ -14,6 +14,7 @@ public class SqlAggregateStore : AggregateStoreBase
     private readonly INumberIdGenerator _numberIdGenerator;
     private readonly TypeMapper _typeMapper;
     private readonly IMediator _mediator;
+    private readonly Dictionary<string, EventStream> _eventStreamLookup = new();
 
     public SqlAggregateStore(
         PaymentDbContext dbContext,
@@ -31,59 +32,88 @@ public class SqlAggregateStore : AggregateStoreBase
 
     protected override async Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
     {
-        foreach (var aggregateItem in aggregateItems.Where(t => t.IsNewAggregate))
+        var dataBuffer = aggregateItems.Aggregate(new DataBuffer(), (buffer, aggregateItem) =>
         {
-            var streamId = _numberIdGenerator.CreateId();
-            await _dbContext.StreamIdMappings.AddAsync(new StreamIdMapping
+            if (aggregateItem.IsNewAggregate)
             {
-                StreamId = streamId,
-                AggregateId = aggregateItem.AggregateRoot.Id,
-            });
-            await _dbContext.EventStreams.AddAsync(new EventStream
-            {
-                Id = streamId,
-                AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
-            });
-        }
+                var newStreamIdMapping = CreateStreamIdMapping(aggregateItem);
+                var newEventStream = CreateEventStream(newStreamIdMapping, aggregateItem);
+                buffer.NewStreamIdMappings.Add(newStreamIdMapping);
+                buffer.NewEventStreams.Add(newEventStream);
 
-        var newEventDataSet = new List<EventEntry>();
-        foreach (var aggregateItem in aggregateItems)
-        {
-            var streamIdMapping = (await _dbContext.StreamIdMappings.FindAsync(aggregateItem.AggregateRoot.Id))!;
-            var eventStream = (await _dbContext.EventStreams.FindAsync(streamIdMapping.StreamId))!;
+                _eventStreamLookup[aggregateItem.AggregateRoot.Id] = newEventStream;
+            }
+
+            var eventStream = _eventStreamLookup[aggregateItem.AggregateRoot.Id];
             foreach (var evt in aggregateItem.NewEvents)
             {
-                var eventName = _typeMapper.GetEventName(evt.GetType());
-                var eventData = new EventEntry
-                {
-                    Id = _numberIdGenerator.CreateId(),
-                    StreamId = eventStream.Id,
-                    Version = ++eventStream.Version,
-                    EventText = JsonSerializer.Serialize(evt),
-                    EventName = eventName,
-                    CreatedAt = _timeProvider.GetUtcNow(),
-                };
-                newEventDataSet.Add(eventData);
+                var eventEntry = CreateEventEntry(evt, eventStream);
+                var outboxEntry = CreateOutboxEntry(eventEntry);
+                buffer.NewEventEntries.Add(eventEntry);
+                buffer.NewOutboxEntries.Add(outboxEntry);
             }
-        }
 
-        var outboxEntries = newEventDataSet.Select(t => new OutboxEntry
-        {
-            EventId = t.Id,
-            Status = EnumOutboxEntryStatus.Waiting,
-            CreatedAt = t.CreatedAt,
-        }).ToArray();
+            return buffer;
+        });
 
-        await _dbContext.EventEntries.AddRangeAsync(newEventDataSet);
-        await _dbContext.OutboxEntries.AddRangeAsync(outboxEntries);
-
+        await _dbContext.StreamIdMappings.AddRangeAsync(dataBuffer.NewStreamIdMappings);
+        await _dbContext.EventStreams.AddRangeAsync(dataBuffer.NewEventStreams);
+        await _dbContext.EventEntries.AddRangeAsync(dataBuffer.NewEventEntries);
+        await _dbContext.OutboxEntries.AddRangeAsync(dataBuffer.NewOutboxEntries);
         await _dbContext.SaveChangesAsync();
 
         await _mediator.Publish(new EventsCreated
         {
-            EventDataSet = newEventDataSet,
-            OutboxEntries = outboxEntries,
+            EventEntries = dataBuffer.NewEventEntries,
+            OutboxEntries = dataBuffer.NewOutboxEntries,
         });
+    }
+
+    private static OutboxEntry CreateOutboxEntry(EventEntry eventEntry)
+    {
+        var outboxEntry = new OutboxEntry
+        {
+            EventId = eventEntry.Id,
+            Status = EnumOutboxEntryStatus.Waiting,
+            CreatedAt = eventEntry.CreatedAt,
+        };
+        return outboxEntry;
+    }
+
+    private EventEntry CreateEventEntry(object evt, EventStream eventStream)
+    {
+        var eventName = _typeMapper.GetEventName(evt.GetType());
+        var eventEntry = new EventEntry
+        {
+            Id = _numberIdGenerator.CreateId(),
+            StreamId = eventStream.Id,
+            Version = ++eventStream.Version,
+            EventText = JsonSerializer.Serialize(evt),
+            EventName = eventName,
+            CreatedAt = _timeProvider.GetUtcNow(),
+        };
+        return eventEntry;
+    }
+
+    private EventStream CreateEventStream(StreamIdMapping newStreamIdMapping, AggregateItem aggregateItem)
+    {
+        var newEventStream = new EventStream
+        {
+            Id = newStreamIdMapping.StreamId,
+            AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
+        };
+        return newEventStream;
+    }
+
+    private StreamIdMapping CreateStreamIdMapping(AggregateItem aggregateItem)
+    {
+        var streamId = _numberIdGenerator.CreateId();
+        var newStreamIdMapping = new StreamIdMapping
+        {
+            StreamId = streamId,
+            AggregateId = aggregateItem.AggregateRoot.Id,
+        };
+        return newStreamIdMapping;
     }
 
     protected override async Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId)
@@ -101,6 +131,19 @@ public class SqlAggregateStore : AggregateStoreBase
             .Select(t => JsonSerializer.Deserialize(t.EventText, _typeMapper.GetEventType(t.EventName), JsonSerializerOptions.Default)!)
             .ToArrayAsync();
 
+        _eventStreamLookup[aggregateId] = eventStream;
+
         return (aggregateRoot, events);
+    }
+
+    private class DataBuffer
+    {
+        public List<EventStream> NewEventStreams { get; } = [];
+
+        public List<StreamIdMapping> NewStreamIdMappings { get; } = [];
+
+        public List<EventEntry> NewEventEntries { get; } = [];
+
+        public List<OutboxEntry> NewOutboxEntries { get; } = [];
     }
 }
