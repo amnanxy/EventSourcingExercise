@@ -10,7 +10,7 @@ public class Capture : EntityBase
 
     public EnumCaptureStatus Status { get; private set; }
 
-    public Capture(Action<object> applier) : base(applier)
+    internal Capture(Action<object> applier) : base(applier)
     {
     }
 
