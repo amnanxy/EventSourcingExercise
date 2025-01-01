@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac.Extensions.DependencyInjection;
 using EventSourcingExercise.Extensions;
+using EventSourcingExercise.Infrastructures.PersistenceModels;
 using EventSourcingExercise.Modules.Generics.Entities;
 using MediatR;
 using Serilog;
@@ -47,6 +48,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.Services.GetRequiredService<PaymentDbContext>()
+        .Database.EnsureCreated();
 }
 
 app.UseHttpsRedirection();

@@ -1,5 +1,4 @@
-﻿using EventSourcingExercise.Infrastructures;
-using EventSourcingExercise.Infrastructures.PersistenceModels;
+﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,16 +15,11 @@ public static class LocalTestingExtensions
             return connection;
         });
 
-        services.AddScoped<PaymentDbContext>(provider =>
+        services.AddDbContextFactory<PaymentDbContext>((provider, options) =>
         {
             var connection = provider.GetRequiredService<SqliteConnection>();
-            var options = new DbContextOptionsBuilder<PaymentDbContext>()
-                .UseSqlite(connection)
-                .Options;
-            var dbContext = new PaymentDbContext(options);
-            dbContext.Database.EnsureCreated();
-            return dbContext;
-        });
+            options.UseSqlite(connection);
+        }, ServiceLifetime.Scoped);
 
         return services;
     }
