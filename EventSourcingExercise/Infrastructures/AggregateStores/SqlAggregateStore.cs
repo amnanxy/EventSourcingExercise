@@ -34,6 +34,7 @@ public class SqlAggregateStore : AggregateStoreBase
     {
         var dataBuffer = aggregateItems.Aggregate(new DataBuffer(), (buffer, aggregateItem) =>
         {
+            var aggregateRoot = aggregateItem.AggregateRoot;
             if (aggregateItem.IsNewAggregate)
             {
                 var newStreamIdMapping = CreateStreamIdMapping(aggregateItem);
@@ -41,11 +42,11 @@ public class SqlAggregateStore : AggregateStoreBase
                 buffer.NewStreamIdMappings.Add(newStreamIdMapping);
                 buffer.NewEventStreams.Add(newEventStream);
 
-                _eventStreamLookup[aggregateItem.AggregateRoot.Id] = newEventStream;
+                _eventStreamLookup[aggregateRoot.Id] = newEventStream;
             }
 
-            var eventStream = _eventStreamLookup[aggregateItem.AggregateRoot.Id];
-            foreach (var evt in aggregateItem.NewEvents)
+            var eventStream = _eventStreamLookup[aggregateRoot.Id];
+            foreach (var evt in aggregateRoot.GetEvents())
             {
                 var eventEntry = CreateEventEntry(evt, eventStream);
                 var outboxEntry = CreateOutboxEntry(eventEntry);

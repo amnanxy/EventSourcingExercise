@@ -15,21 +15,21 @@ public abstract class AggregateStoreBase
     public void Update<TAggregate>(TAggregate aggregateRoot)
         where TAggregate : AggregateRoot
     {
-        _aggregateRootLookup[aggregateRoot.Id] = aggregateRoot;
+        // nothing to do
     }
 
     public async Task Commit()
     {
         var aggregateRoots = _aggregateRootLookup
             .Select(t => t.Value)
-            .Where(t => t.EventCount > 0);
+            .Where(t => t.EventCount > 0)
+            .ToArray();
 
         var aggregateItems = aggregateRoots
             .Select(aggregateRoot => new AggregateItem
             {
                 IsNewAggregate = _newAggregateIds.Contains(aggregateRoot.Id),
                 AggregateRoot = aggregateRoot,
-                NewEvents = aggregateRoot.GetEvents(),
             })
             .ToArray();
 
@@ -71,7 +71,5 @@ public abstract class AggregateStoreBase
         public bool IsNewAggregate { get; init; }
 
         public required AggregateRoot AggregateRoot { get; init; }
-
-        public required IReadOnlyList<object> NewEvents { get; init; }
     }
 }
