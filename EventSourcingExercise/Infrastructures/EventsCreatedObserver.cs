@@ -1,37 +1,23 @@
-﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
-using EventSourcingExercise.Infrastructures.Projectors;
+﻿using EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
 using MediatR;
 
 namespace EventSourcingExercise.Infrastructures;
 
 public class EventsCreatedObserver : INotificationHandler<EventsCreated>
 {
-    private readonly IClusterClient _clusterClient;
-    private readonly PaymentDbContext _dbContext;
-    private readonly TimeProvider _timeProvider;
+    private readonly EventDeliveryChannel _eventDeliveryChannel;
 
-    public EventsCreatedObserver(IClusterClient clusterClient, PaymentDbContext dbContext, TimeProvider timeProvider)
+    public EventsCreatedObserver(EventDeliveryChannel eventDeliveryChannel)
     {
-        _clusterClient = clusterClient;
-        _dbContext = dbContext;
-        _timeProvider = timeProvider;
+        _eventDeliveryChannel = eventDeliveryChannel;
     }
 
     public async Task Handle(EventsCreated notification, CancellationToken cancellationToken)
     {
-        _dbContext.OutboxEntries.AttachRange(notification.OutboxEntries);
-        var streamProvider = _clusterClient.GetStreamProvider("StreamProvider");
-        var id = StreamId.Create(ProjectorName.TransactionRecord, string.Empty);
-        var stream = streamProvider.GetStream<EventEntry>(id);
-
-        foreach (var eventEntry in notification.EventEntries)
+        await _eventDeliveryChannel.Write(new EventDeliveryPackage
         {
-            await stream.OnNextAsync(eventEntry);
-            var outboxEntry = notification.OutboxEntries.Single(t => t.EventId == eventEntry.Id);
-            outboxEntry.Status = EnumOutboxEntryStatus.Delivered;
-            outboxEntry.DeliveredAt = _timeProvider.GetUtcNow();
-        }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
+            EventEntries = notification.EventEntries,
+            OutboxEntries = notification.OutboxEntries,
+        });
     }
 }

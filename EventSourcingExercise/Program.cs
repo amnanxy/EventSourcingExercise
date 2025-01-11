@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac.Extensions.DependencyInjection;
 using EventSourcingExercise.Extensions;
+using EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
 using EventSourcingExercise.Infrastructures.PersistenceModels;
 using EventSourcingExercise.Modules.Generics.Entities;
 using MediatR;
@@ -41,6 +42,10 @@ builder.Services.AddTransient(typeof(IRequestHandler<,>), typeof(AggregateHandle
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddServices();
 builder.Services.AddEventTypeMapper();
+builder.Services
+    .AddSingleton<EventDeliveryChannel>()
+    .AddSingleton<EventDeliveryService>()
+    .AddHostedService<EventDeliveryBackgroundService>();
 
 var app = builder.Build();
 
