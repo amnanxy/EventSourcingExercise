@@ -4,15 +4,10 @@ namespace EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveri
 
 public class EventDeliveryChannel
 {
-    private readonly Channel<EventDeliveryPackage> _channel;
-
-    public EventDeliveryChannel()
+    private readonly Channel<EventDeliveryPackage> _channel = Channel.CreateBounded<EventDeliveryPackage>(new BoundedChannelOptions(10000)
     {
-        _channel = Channel.CreateBounded<EventDeliveryPackage>(new BoundedChannelOptions(10000)
-        {
-            FullMode = BoundedChannelFullMode.Wait,
-        });
-    }
+        FullMode = BoundedChannelFullMode.Wait,
+    });
 
     public IAsyncEnumerable<EventDeliveryPackage> Read()
     {
