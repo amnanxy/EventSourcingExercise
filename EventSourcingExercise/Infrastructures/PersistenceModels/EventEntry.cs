@@ -11,7 +11,7 @@ public class EventEntry
     public long StreamId { get; init; }
 
     [Id(3)]
-    public sbyte Version { get; init; }
+    public int Version { get; init; }
 
     [Id(4)]
     public required string EventText { get; init; }

@@ -21,20 +21,29 @@ public class PaymentDbContext : DbContext
     {
         modelBuilder.Entity<EventStream>(builder =>
         {
+            builder.ToTable("event_stream");
+
             builder.HasKey(t => t.Id)
                 .HasName("pk_id");
 
-            builder.Property(t => t.Id);
+            builder.Property(t => t.Id)
+                .HasColumnName("id")
+                .ValueGeneratedOnAdd();
 
             builder.Property(t => t.AggregateRootTypeName)
-                .HasMaxLength(30);
+                .HasColumnName("aggregate_root_type_name")
+                .HasColumnType("varchar(50)");
 
             builder.Property(t => t.Version)
+                .HasColumnName("version")
+                .HasColumnType("int")
                 .IsConcurrencyToken();
         });
 
         modelBuilder.Entity<EventEntry>(builder =>
         {
+            builder.ToTable("event_entry");
+
             builder.HasKey(t => t.Id)
                 .HasName("pk_id");
 
@@ -42,17 +51,29 @@ public class PaymentDbContext : DbContext
                 .IsUnique()
                 .HasDatabaseName("uk_streamId_version");
 
-            builder.Property(t => t.StreamId);
+            builder.Property(t => t.Id)
+                .HasColumnName("id")
+                .ValueGeneratedOnAdd();
 
-            builder.Property(t => t.Version);
+            builder.Property(t => t.StreamId)
+                .HasColumnName("stream_id")
+                .HasColumnType("bigint");
+
+            builder.Property(t => t.Version)
+                .HasColumnName("version")
+                .HasColumnType("int");
 
             builder.Property(t => t.EventText)
-                .HasMaxLength(500);
+                .HasColumnName("event_text")
+                .HasColumnType("jsonb");
 
             builder.Property(t => t.EventName)
-                .HasMaxLength(50);
+                .HasColumnName("event_name")
+                .HasColumnType("varchar(50)");
 
-            builder.Property(t => t.CreatedAt);
+            builder.Property(t => t.CreatedAt)
+                .HasColumnName("created_at")
+                .HasColumnType("datetime");
 
             builder.HasOne<EventStream>()
                 .WithMany()
@@ -62,6 +83,8 @@ public class PaymentDbContext : DbContext
 
         modelBuilder.Entity<StreamIdMapping>(builder =>
         {
+            builder.ToTable("stream_id_mapping");
+
             builder.HasKey(t => t.AggregateId)
                 .HasName("pk_aggregateId");
 
@@ -70,13 +93,18 @@ public class PaymentDbContext : DbContext
                 .HasDatabaseName("uk_streamId");
 
             builder.Property(t => t.AggregateId)
-                .HasMaxLength(40);
+                .HasColumnName("aggregate_id")
+                .HasColumnType("varchar(40)");
 
-            builder.Property(t => t.StreamId);
+            builder.Property(t => t.StreamId)
+                .HasColumnName("stream_id")
+                .HasColumnType("bigint");
         });
 
         modelBuilder.Entity<OutboxEntry>(builder =>
         {
+            builder.ToTable("outbox_entry");
+
             builder.HasKey(t => t.EventId)
                 .HasName("pk_eventId");
 
@@ -84,11 +112,21 @@ public class PaymentDbContext : DbContext
                 .HasFilter($"status = '{EnumOutboxEntryStatus.Waiting}'")
                 .HasDatabaseName("ix_createdAt_filter");
 
-            builder.Property(t => t.Status);
+            builder.Property(t => t.EventId)
+                .HasColumnName("event_id");
 
-            builder.Property(t => t.CreatedAt);
+            builder.Property(t => t.Status)
+                .HasColumnName("status")
+                .HasColumnType("varchar(40)");
 
-            builder.Property(t => t.DeliveredAt);
+            builder.Property(t => t.CreatedAt)
+                .HasColumnName("created_at")
+                .HasColumnType("datetime");
+
+            builder.Property(t => t.DeliveredAt)
+                .HasColumnName("delivered_at")
+                .HasColumnType("datetime")
+                .IsRequired(false);
         });
     }
 

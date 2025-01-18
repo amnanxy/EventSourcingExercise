@@ -6,5 +6,5 @@ public class EventStream
 
     public string AggregateRootTypeName { get; internal init; } = null!;
 
-    public sbyte Version { get; internal set; }
+    public int Version { get; internal set; }
 }
