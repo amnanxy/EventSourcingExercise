@@ -9,9 +9,9 @@ public class EventDeliveryChannel
         FullMode = BoundedChannelFullMode.Wait,
     });
 
-    public IAsyncEnumerable<EventDeliveryPackage> Read()
+    public IAsyncEnumerable<EventDeliveryPackage> Read(CancellationToken cancellationToken)
     {
-        return _channel.Reader.ReadAllAsync();
+        return _channel.Reader.ReadAllAsync(cancellationToken);
     }
 
     public async Task Write(EventDeliveryPackage package)

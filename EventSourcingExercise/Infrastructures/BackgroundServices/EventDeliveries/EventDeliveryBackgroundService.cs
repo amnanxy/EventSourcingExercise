@@ -11,11 +11,9 @@ public class EventDeliveryBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        stoppingToken.Register(() => { _service.Close(); });
-
         while (stoppingToken.IsCancellationRequested == false)
         {
-            await _service.Handle();
+            await _service.Handle(stoppingToken);
         }
     }
 }
