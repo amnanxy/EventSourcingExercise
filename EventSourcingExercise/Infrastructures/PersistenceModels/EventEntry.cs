@@ -20,5 +20,5 @@ public class EventEntry
     public required string EventName { get; init; }
 
     [Id(6)]
-    public DateTimeOffset CreatedAt { get; init; }
+    public DateTime CreatedAt { get; init; }
 }

@@ -2,11 +2,11 @@
 
 public class OutboxEntry
 {
-    public long EventId { get; set; }
+    public long EventId { get; init; }
 
     public EnumOutboxEntryStatus Status { get; set; }
 
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTime CreatedAt { get; init; }
 
-    public DateTimeOffset? DeliveredAt { get; set; }
+    public DateTime? DeliveredAt { get; set; }
 }

@@ -44,7 +44,7 @@ public class EventDeliveryService
                     await stream.OnNextAsync(eventEntry);
                     var outboxEntry = package.OutboxEntries.Single(t => t.EventId == eventEntry.Id);
                     outboxEntry.Status = EnumOutboxEntryStatus.Delivered;
-                    outboxEntry.DeliveredAt = _timeProvider.GetUtcNow();
+                    outboxEntry.DeliveredAt = _timeProvider.GetUtcNow().DateTime;
                 }
             }
             catch (Exception e)

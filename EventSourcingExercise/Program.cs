@@ -45,7 +45,8 @@ builder.Services.AddEventTypeMapper();
 builder.Services
     .AddSingleton<EventDeliveryChannel>()
     .AddSingleton<EventDeliveryService>()
-    .AddHostedService<EventDeliveryBackgroundService>();
+    .AddHostedService<EventDeliveryBackgroundService>()
+    .AddHostedService<MissingEventDetectionBackgroundService>();
 
 var app = builder.Build();
 

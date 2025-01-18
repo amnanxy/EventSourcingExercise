@@ -49,7 +49,7 @@ public class PaymentDbContext : DbContext
 
             builder.HasIndex(t => new { t.StreamId, t.Version })
                 .IsUnique()
-                .HasDatabaseName("uk_streamId_version");
+                .HasDatabaseName("uk_stream_id_version");
 
             builder.Property(t => t.Id)
                 .HasColumnName("id")
@@ -86,11 +86,11 @@ public class PaymentDbContext : DbContext
             builder.ToTable("stream_id_mapping");
 
             builder.HasKey(t => t.AggregateId)
-                .HasName("pk_aggregateId");
+                .HasName("pk_aggregate_id");
 
             builder.HasIndex(t => t.StreamId)
                 .IsUnique()
-                .HasDatabaseName("uk_streamId");
+                .HasDatabaseName("uk_stream_id");
 
             builder.Property(t => t.AggregateId)
                 .HasColumnName("aggregate_id")
@@ -106,11 +106,11 @@ public class PaymentDbContext : DbContext
             builder.ToTable("outbox_entry");
 
             builder.HasKey(t => t.EventId)
-                .HasName("pk_eventId");
+                .HasName("pk_event_id");
 
             builder.HasIndex(t => new { t.CreatedAt })
                 .HasFilter($"status = '{EnumOutboxEntryStatus.Waiting}'")
-                .HasDatabaseName("ix_createdAt_filter");
+                .HasDatabaseName("ix_created_at_filter");
 
             builder.Property(t => t.EventId)
                 .HasColumnName("event_id");

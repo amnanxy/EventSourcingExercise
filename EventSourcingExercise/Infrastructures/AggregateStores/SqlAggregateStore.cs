@@ -91,7 +91,7 @@ public class SqlAggregateStore : AggregateStoreBase
             Version = ++eventStream.Version,
             EventText = JsonSerializer.Serialize(evt),
             EventName = eventName,
-            CreatedAt = _timeProvider.GetUtcNow(),
+            CreatedAt = _timeProvider.GetUtcNow().DateTime,
         };
         return eventEntry;
     }
