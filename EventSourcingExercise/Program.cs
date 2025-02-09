@@ -41,6 +41,7 @@ builder.Services.AddHealthChecks();
 builder.Services.AddTransient(typeof(IRequestHandler<,>), typeof(AggregateHandler<>));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 builder.Services.AddServices();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEventTypeMapper();
 builder.Services
     .AddSingleton<EventDeliveryChannel>()

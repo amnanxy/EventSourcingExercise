@@ -38,6 +38,10 @@ public class PaymentDbContext : DbContext
                 .HasColumnName("version")
                 .HasColumnType("int")
                 .IsConcurrencyToken();
+            
+            builder.Property(t => t.TenantId)
+                .HasColumnName("tenant_id")
+                .HasColumnType("varchar(40)");
         });
 
         modelBuilder.Entity<EventEntry>(builder =>

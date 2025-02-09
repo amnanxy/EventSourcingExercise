@@ -44,15 +44,30 @@ public sealed class MissingEventDetectionGrain : IGrainBase, IMissingEventDetect
                               && outboxEntry.CreatedAt <= _timeProvider.GetUtcNow().AddSeconds(-10).DateTime
                         select new { EventEntry = eventEntry, OutboxEntry = outboxEntry };
 
-        var packageEntries = await queryable.ToArrayAsync(cancellationToken);
-        if (packageEntries.Length > 0)
+        var missingEntries = await queryable.ToArrayAsync(cancellationToken);
+        var missingGroups = missingEntries.GroupBy(t => t.EventEntry.StreamId)
+            .ToArray();
+
+        if (missingGroups.Length > 0)
         {
-            var eventDeliveryPackage = new EventDeliveryPackage
+            var streamIds = missingGroups
+                .Select(t => t.Key);
+
+            var tenantIdLookup = await paymentDbContext.EventStreams
+                .Where(t => streamIds.Contains(t.Id))
+                .Select(t => new { t.Id, t.TenantId })
+                .ToDictionaryAsync(t => t.Id, t => t.TenantId, cancellationToken);
+
+            foreach (var missingGroup in missingGroups)
             {
-                EventEntries = packageEntries.Select(t => t.EventEntry).ToArray(),
-                OutboxEntries = packageEntries.Select(t => t.OutboxEntry).ToArray(),
-            };
-            await _eventDeliveryChannel.Write(eventDeliveryPackage);
+                var eventDeliveryPackage = new EventDeliveryPackage
+                {
+                    TenantId = tenantIdLookup[missingGroup.Key],
+                    EventEntries = missingGroup.Select(t => t.EventEntry).ToArray(),
+                    OutboxEntries = missingGroup.Select(t => t.OutboxEntry).ToArray(),
+                };
+                await _eventDeliveryChannel.Write(eventDeliveryPackage);
+            }
         }
     }
 

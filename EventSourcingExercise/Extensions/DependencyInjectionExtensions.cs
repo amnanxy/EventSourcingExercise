@@ -1,4 +1,5 @@
 ﻿using EventSourcingExercise.Cores;
+using EventSourcingExercise.Infrastructures;
 using EventSourcingExercise.Infrastructures.AggregateStores;
 using EventSourcingExercise.Infrastructures.IdGenerators;
 using EventSourcingExercise.Modules.Transactions.Applications.ThirdPartyGateways;
@@ -15,6 +16,7 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IThirdPartyGateway, ThirdPartyGateway>();
         services.AddScoped<INumberIdGenerator>(_ => new NumberIdGenerator(0));
         services.AddScoped<ITextIdGenerator, TextIdGenerator>();
+        services.AddScoped<ITenantService, TenantService>();
 
         return services;
     }

@@ -14,6 +14,7 @@ public class SqlAggregateStore : AggregateStoreBase
     private readonly INumberIdGenerator _numberIdGenerator;
     private readonly TypeMapper _typeMapper;
     private readonly IMediator _mediator;
+    private readonly ITenantService _tenantService;
     private readonly Dictionary<string, EventStream> _eventStreamLookup = new();
 
     public SqlAggregateStore(
@@ -21,24 +22,27 @@ public class SqlAggregateStore : AggregateStoreBase
         TimeProvider timeProvider,
         INumberIdGenerator numberIdGenerator,
         TypeMapper typeMapper,
-        IMediator mediator)
+        IMediator mediator,
+        ITenantService tenantService)
     {
         _dbContext = dbContext;
         _timeProvider = timeProvider;
         _numberIdGenerator = numberIdGenerator;
         _typeMapper = typeMapper;
         _mediator = mediator;
+        _tenantService = tenantService;
     }
 
     protected override async Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
     {
+        var tenantId = await _tenantService.GetTenantId();
         var dataBuffer = aggregateItems.Aggregate(new DataBuffer(), (buffer, aggregateItem) =>
         {
             var aggregateRoot = aggregateItem.AggregateRoot;
             if (aggregateItem.IsNewAggregate)
             {
                 var newStreamIdMapping = CreateStreamIdMapping(aggregateItem);
-                var newEventStream = CreateEventStream(newStreamIdMapping, aggregateItem);
+                var newEventStream = CreateEventStream(newStreamIdMapping, aggregateItem, tenantId);
                 buffer.NewStreamIdMappings.Add(newStreamIdMapping);
                 buffer.NewEventStreams.Add(newEventStream);
 
@@ -65,6 +69,7 @@ public class SqlAggregateStore : AggregateStoreBase
 
         await _mediator.Publish(new EventsCreated
         {
+            TenantId = tenantId,
             EventEntries = dataBuffer.NewEventEntries,
             OutboxEntries = dataBuffer.NewOutboxEntries,
         });
@@ -72,19 +77,18 @@ public class SqlAggregateStore : AggregateStoreBase
 
     private static OutboxEntry CreateOutboxEntry(EventEntry eventEntry)
     {
-        var outboxEntry = new OutboxEntry
+        return new OutboxEntry
         {
             EventId = eventEntry.Id,
             Status = EnumOutboxEntryStatus.Waiting,
             CreatedAt = eventEntry.CreatedAt,
         };
-        return outboxEntry;
     }
 
     private EventEntry CreateEventEntry(object evt, EventStream eventStream)
     {
         var eventName = _typeMapper.GetEventName(evt.GetType());
-        var eventEntry = new EventEntry
+        return new EventEntry
         {
             Id = _numberIdGenerator.CreateId(),
             StreamId = eventStream.Id,
@@ -93,28 +97,26 @@ public class SqlAggregateStore : AggregateStoreBase
             EventName = eventName,
             CreatedAt = _timeProvider.GetUtcNow().DateTime,
         };
-        return eventEntry;
     }
 
-    private EventStream CreateEventStream(StreamIdMapping newStreamIdMapping, AggregateItem aggregateItem)
+    private EventStream CreateEventStream(StreamIdMapping newStreamIdMapping, AggregateItem aggregateItem, string tenantId)
     {
-        var newEventStream = new EventStream
+        return new EventStream
         {
             Id = newStreamIdMapping.StreamId,
             AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
+            TenantId = tenantId,
         };
-        return newEventStream;
     }
 
     private StreamIdMapping CreateStreamIdMapping(AggregateItem aggregateItem)
     {
         var streamId = _numberIdGenerator.CreateId();
-        var newStreamIdMapping = new StreamIdMapping
+        return new StreamIdMapping
         {
             StreamId = streamId,
             AggregateId = aggregateItem.AggregateRoot.Id,
         };
-        return newStreamIdMapping;
     }
 
     protected override async Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId)

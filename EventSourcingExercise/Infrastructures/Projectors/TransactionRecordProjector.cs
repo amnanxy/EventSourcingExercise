@@ -1,11 +1,11 @@
-﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+﻿using EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
 using Orleans.Streams;
 using Orleans.Streams.Core;
 
 namespace EventSourcingExercise.Infrastructures.Projectors;
 
 [ImplicitStreamSubscription(ProjectorName.TransactionRecord)]
-public class TransactionRecordProjector : Grain, IGrainWithStringKey, IStreamSubscriptionObserver, IAsyncObserver<EventEntry>
+public class TransactionRecordProjector : Grain, IGrainWithStringKey, IStreamSubscriptionObserver, IAsyncObserver<EventItem>
 {
     private readonly ILogger<TransactionRecordProjector> _logger;
 
@@ -16,17 +16,17 @@ public class TransactionRecordProjector : Grain, IGrainWithStringKey, IStreamSub
 
     public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
     {
-        var handle = handleFactory.Create<EventEntry>();
+        var handle = handleFactory.Create<EventItem>();
         await handle.ResumeAsync(this);
     }
 
-    public Task OnNextAsync(EventEntry entry, StreamSequenceToken? token = null)
+    public Task OnNextAsync(EventItem item, StreamSequenceToken? token = null)
     {
         _logger.LogInformation("GrainId: {GrainId}, IdentityString: {IdentityString}, RuntimeIdentity: {RuntimeIdentity}, Item: {@Item}",
             this.GetGrainId().Key.Value,
             IdentityString,
             RuntimeIdentity,
-            entry);
+            item);
         return Task.CompletedTask;
     }
 

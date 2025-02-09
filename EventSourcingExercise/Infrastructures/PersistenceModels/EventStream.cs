@@ -2,9 +2,11 @@
 
 public class EventStream
 {
-    public long Id { get; internal init; }
+    public long Id { get; init; }
 
-    public string AggregateRootTypeName { get; internal init; } = null!;
+    public required string AggregateRootTypeName { get; init; }
 
     public int Version { get; internal set; }
+
+    public required string TenantId { get; init; }
 }

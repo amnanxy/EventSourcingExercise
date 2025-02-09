@@ -30,7 +30,7 @@ public class EventDeliveryService
     {
         var streamProvider = _clusterClient.GetStreamProvider("StreamProvider");
         var id = StreamId.Create(ProjectorName.TransactionRecord, string.Empty);
-        var stream = streamProvider.GetStream<EventEntry>(id);
+        var stream = streamProvider.GetStream<EventItem>(id);
 
         await foreach (var package in _channel.Read(cancellationToken))
         {
@@ -41,7 +41,7 @@ public class EventDeliveryService
             {
                 foreach (var eventEntry in package.EventEntries)
                 {
-                    await stream.OnNextAsync(eventEntry);
+                    await stream.OnNextAsync(CreateItem(eventEntry, package));
                     var outboxEntry = package.OutboxEntries.Single(t => t.EventId == eventEntry.Id);
                     outboxEntry.Status = EnumOutboxEntryStatus.Delivered;
                     outboxEntry.DeliveredAt = _timeProvider.GetUtcNow().DateTime;
@@ -54,5 +54,19 @@ public class EventDeliveryService
 
             await paymentDbContext.SaveChangesAsync();
         }
+    }
+
+    private static EventItem CreateItem(EventEntry eventEntry, EventDeliveryPackage package)
+    {
+        return new EventItem
+        {
+            EventId = eventEntry.Id,
+            StreamId = eventEntry.StreamId,
+            TenantId = package.TenantId,
+            Version = eventEntry.Version,
+            EventText = eventEntry.EventText,
+            EventName = eventEntry.EventName,
+            CreatedAt = eventEntry.CreatedAt,
+        };
     }
 }
