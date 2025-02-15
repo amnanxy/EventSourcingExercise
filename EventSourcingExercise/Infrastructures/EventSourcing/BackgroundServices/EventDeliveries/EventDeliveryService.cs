@@ -1,8 +1,8 @@
-﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing.Models;
 using EventSourcingExercise.Infrastructures.Projectors;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
+namespace EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 
 public class EventDeliveryService
 {

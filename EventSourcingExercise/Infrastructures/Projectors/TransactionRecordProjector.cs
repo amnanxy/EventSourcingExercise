@@ -1,4 +1,4 @@
-﻿using EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 using Orleans.Streams;
 using Orleans.Streams.Core;
 

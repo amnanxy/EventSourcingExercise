@@ -1,4 +1,4 @@
-﻿namespace EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
+﻿namespace EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 
 [GenerateSerializer]
 [Alias("EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries.EventItem")]

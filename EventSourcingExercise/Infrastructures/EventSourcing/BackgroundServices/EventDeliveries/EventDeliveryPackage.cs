@@ -1,9 +1,8 @@
-﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
-using MediatR;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing.Models;
 
-namespace EventSourcingExercise.Infrastructures;
+namespace EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 
-public class EventsCreated : INotification
+public class EventDeliveryPackage
 {
     public required string TenantId { get; init; }
 

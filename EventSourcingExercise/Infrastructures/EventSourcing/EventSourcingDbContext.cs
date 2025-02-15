@@ -1,7 +1,9 @@
-﻿using EventSourcingExercise.Modules.Transactions.Domains.Enums;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing.Models;
+using EventSourcingExercise.Infrastructures.PersistenceModels;
+using EventSourcingExercise.Modules.Transactions.Domains.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventSourcingExercise.Infrastructures.PersistenceModels;
+namespace EventSourcingExercise.Infrastructures.EventSourcing;
 
 public class EventSourcingDbContext : DbContext
 {

@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
 using EventSourcingExercise.Cores;
+using EventSourcingExercise.Infrastructures.EventSourcing.Models;
 using EventSourcingExercise.Infrastructures.PersistenceModels;
 using EventSourcingExercise.Utilities.IdGenerators;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventSourcingExercise.Infrastructures.AggregateStores;
+namespace EventSourcingExercise.Infrastructures.EventSourcing.AggregateStores;
 
 public class SqlAggregateStore : AggregateStoreBase
 {

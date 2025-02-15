@@ -1,7 +1,7 @@
-﻿using EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 using MediatR;
 
-namespace EventSourcingExercise.Infrastructures;
+namespace EventSourcingExercise.Infrastructures.EventSourcing;
 
 public class EventsCreatedObserver : INotificationHandler<EventsCreated>
 {

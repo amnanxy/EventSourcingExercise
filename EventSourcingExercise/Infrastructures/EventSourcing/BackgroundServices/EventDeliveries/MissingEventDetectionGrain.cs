@@ -1,8 +1,8 @@
-﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing.Models;
 using Microsoft.EntityFrameworkCore;
 using Orleans.Timers;
 
-namespace EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
+namespace EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 
 public sealed class MissingEventDetectionGrain : IGrainBase, IMissingEventDetectionGrain
 {

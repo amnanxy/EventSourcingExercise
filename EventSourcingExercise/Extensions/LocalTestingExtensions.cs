@@ -1,4 +1,5 @@
-﻿using EventSourcingExercise.Infrastructures.PersistenceModels;
+﻿using EventSourcingExercise.Infrastructures.EventSourcing;
+using EventSourcingExercise.Infrastructures.EventSourcing.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 

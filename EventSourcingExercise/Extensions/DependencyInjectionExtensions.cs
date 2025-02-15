@@ -1,6 +1,6 @@
 ﻿using EventSourcingExercise.Cores;
 using EventSourcingExercise.Infrastructures;
-using EventSourcingExercise.Infrastructures.AggregateStores;
+using EventSourcingExercise.Infrastructures.EventSourcing.AggregateStores;
 using EventSourcingExercise.Infrastructures.IdGenerators;
 using EventSourcingExercise.Modules.Transactions.Applications.ThirdPartyGateways;
 using EventSourcingExercise.Utilities.IdGenerators;

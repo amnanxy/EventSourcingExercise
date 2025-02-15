@@ -1,6 +1,6 @@
 ﻿using System.Threading.Channels;
 
-namespace EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries;
+namespace EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 
 public class EventDeliveryChannel
 {
