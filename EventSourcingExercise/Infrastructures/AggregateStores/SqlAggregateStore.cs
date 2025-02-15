@@ -9,7 +9,7 @@ namespace EventSourcingExercise.Infrastructures.AggregateStores;
 
 public class SqlAggregateStore : AggregateStoreBase
 {
-    private readonly PaymentDbContext _dbContext;
+    private readonly EventSourcingDbContext _dbContext;
     private readonly TimeProvider _timeProvider;
     private readonly INumberIdGenerator _numberIdGenerator;
     private readonly TypeMapper _typeMapper;
@@ -18,7 +18,7 @@ public class SqlAggregateStore : AggregateStoreBase
     private readonly Dictionary<string, EventStream> _eventStreamLookup = new();
 
     public SqlAggregateStore(
-        PaymentDbContext dbContext,
+        EventSourcingDbContext dbContext,
         TimeProvider timeProvider,
         INumberIdGenerator numberIdGenerator,
         TypeMapper typeMapper,

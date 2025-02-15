@@ -7,14 +7,14 @@ namespace EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveri
 public sealed class MissingEventDetectionGrain : IGrainBase, IMissingEventDetectionGrain
 {
     private readonly EventDeliveryChannel _eventDeliveryChannel;
-    private readonly IDbContextFactory<PaymentDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<EventSourcingReadOnlyDbContext> _dbContextFactory;
     private readonly TimeProvider _timeProvider;
 
     public IGrainContext GrainContext { get; }
 
     public MissingEventDetectionGrain(
         EventDeliveryChannel eventDeliveryChannel,
-        IDbContextFactory<PaymentDbContext> dbContextFactory,
+        IDbContextFactory<EventSourcingReadOnlyDbContext> dbContextFactory,
         IGrainContext grainContext,
         ITimerRegistry timerRegistry,
         TimeProvider timeProvider)

@@ -55,7 +55,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.Services.GetRequiredService<PaymentDbContext>()
+    app.Services.GetRequiredService<EventSourcingDbContext>()
         .Database.EnsureCreated();
 }
 

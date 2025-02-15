@@ -8,14 +8,14 @@ public class EventDeliveryService
 {
     private readonly EventDeliveryChannel _channel;
     private readonly IClusterClient _clusterClient;
-    private readonly IDbContextFactory<PaymentDbContext> _dbContextFactory;
+    private readonly IDbContextFactory<EventSourcingDbContext> _dbContextFactory;
     private readonly ILogger<EventDeliveryService> _logger;
     private readonly TimeProvider _timeProvider;
 
     public EventDeliveryService(
         EventDeliveryChannel channel,
         IClusterClient clusterClient,
-        IDbContextFactory<PaymentDbContext> dbContextFactory,
+        IDbContextFactory<EventSourcingDbContext> dbContextFactory,
         ILogger<EventDeliveryService> logger,
         TimeProvider timeProvider)
     {

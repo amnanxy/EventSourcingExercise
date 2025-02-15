@@ -3,9 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventSourcingExercise.Infrastructures.PersistenceModels;
 
-public class PaymentDbContext : DbContext
+public class EventSourcingDbContext : DbContext
 {
-    public PaymentDbContext(DbContextOptions<PaymentDbContext> options) : base(options)
+    public EventSourcingDbContext(DbContextOptions<EventSourcingDbContext> options) : base(options)
+    {
+    }
+
+    protected EventSourcingDbContext(DbContextOptions options) : base(options)
     {
     }
 
@@ -38,7 +42,7 @@ public class PaymentDbContext : DbContext
                 .HasColumnName("version")
                 .HasColumnType("int")
                 .IsConcurrencyToken();
-            
+
             builder.Property(t => t.TenantId)
                 .HasColumnName("tenant_id")
                 .HasColumnType("varchar(40)");
