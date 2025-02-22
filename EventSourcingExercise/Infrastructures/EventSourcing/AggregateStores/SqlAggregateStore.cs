@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using EventSourcingExercise.Cores;
 using EventSourcingExercise.Infrastructures.EventSourcing.Models;
-using EventSourcingExercise.Modules.Transactions.Applications.Models;
 using EventSourcingExercise.Utilities.IdGenerators;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -109,16 +108,6 @@ public class SqlAggregateStore : AggregateStoreBase
             Id = streamId,
             AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
             TenantCode = tenantCode,
-        };
-    }
-
-    private StreamIdMapping CreateStreamIdMapping(AggregateItem aggregateItem)
-    {
-        var streamId = _numberIdGenerator.CreateId();
-        return new StreamIdMapping
-        {
-            StreamId = streamId,
-            AggregateCode = aggregateItem.AggregateRoot.Id,
         };
     }
 
