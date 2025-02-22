@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using EventSourcingExercise.Cores;
 using EventSourcingExercise.Infrastructures.EventSourcing.Models;
-using EventSourcingExercise.Infrastructures.PersistenceModels;
+using EventSourcingExercise.Modules.Transactions.Applications.Models;
 using EventSourcingExercise.Utilities.IdGenerators;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,7 @@ public class SqlAggregateStore : AggregateStoreBase
     private readonly TypeMapper _typeMapper;
     private readonly IMediator _mediator;
     private readonly ITenantService _tenantService;
-    private readonly Dictionary<string, EventStream> _eventStreamLookup = new();
+    private readonly Dictionary<long, EventStream> _eventStreamLookup = new();
 
     public SqlAggregateStore(
         EventSourcingDbContext dbContext,
@@ -34,6 +34,11 @@ public class SqlAggregateStore : AggregateStoreBase
         _tenantService = tenantService;
     }
 
+    protected override long GetStreamId()
+    {
+        return _numberIdGenerator.CreateId();
+    }
+
     protected override async Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
     {
         var tenantId = await _tenantService.GetTenantId();
@@ -42,15 +47,13 @@ public class SqlAggregateStore : AggregateStoreBase
             var aggregateRoot = aggregateItem.AggregateRoot;
             if (aggregateItem.IsNewAggregate)
             {
-                var newStreamIdMapping = CreateStreamIdMapping(aggregateItem);
-                var newEventStream = CreateEventStream(newStreamIdMapping, aggregateItem, tenantId);
-                buffer.NewStreamIdMappings.Add(newStreamIdMapping);
+                var newEventStream = CreateEventStream(aggregateItem.StreamId, aggregateItem, tenantId);
                 buffer.NewEventStreams.Add(newEventStream);
 
-                _eventStreamLookup[aggregateRoot.Id] = newEventStream;
+                _eventStreamLookup[aggregateItem.StreamId] = newEventStream;
             }
 
-            var eventStream = _eventStreamLookup[aggregateRoot.Id];
+            var eventStream = _eventStreamLookup[aggregateItem.StreamId];
             foreach (var evt in aggregateRoot.GetEvents())
             {
                 var eventEntry = CreateEventEntry(evt, eventStream);
@@ -62,7 +65,6 @@ public class SqlAggregateStore : AggregateStoreBase
             return buffer;
         });
 
-        await _dbContext.StreamIdMappings.AddRangeAsync(dataBuffer.NewStreamIdMappings);
         await _dbContext.EventStreams.AddRangeAsync(dataBuffer.NewEventStreams);
         await _dbContext.EventEntries.AddRangeAsync(dataBuffer.NewEventEntries);
         await _dbContext.OutboxEntries.AddRangeAsync(dataBuffer.NewOutboxEntries);
@@ -100,11 +102,11 @@ public class SqlAggregateStore : AggregateStoreBase
         };
     }
 
-    private EventStream CreateEventStream(StreamIdMapping newStreamIdMapping, AggregateItem aggregateItem, string tenantId)
+    private EventStream CreateEventStream(long streamId, AggregateItem aggregateItem, string tenantId)
     {
         return new EventStream
         {
-            Id = newStreamIdMapping.StreamId,
+            Id = streamId,
             AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
             TenantId = tenantId,
         };
@@ -116,26 +118,26 @@ public class SqlAggregateStore : AggregateStoreBase
         return new StreamIdMapping
         {
             StreamId = streamId,
-            AggregateId = aggregateItem.AggregateRoot.Id,
+            AggregateCode = aggregateItem.AggregateRoot.Id,
         };
     }
 
-    protected override async Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId)
+    protected override async Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(long streamId)
     {
-        var streamIdMapping = await _dbContext.StreamIdMappings.FindAsync(aggregateId);
-        if (streamIdMapping == null)
+        var eventStream = await _dbContext.EventStreams.FindAsync(streamId);
+
+        if (eventStream == null)
         {
             return (null, []);
         }
 
-        var eventStream = (await _dbContext.EventStreams.FindAsync(streamIdMapping.StreamId))!;
         var aggregateRootType = _typeMapper.GetAggregateRootType(eventStream.AggregateRootTypeName);
         var aggregateRoot = Activator.CreateInstance(aggregateRootType, nonPublic: true);
-        var events = await _dbContext.EventEntries.Where(t => t.StreamId == streamIdMapping.StreamId)
+        var events = await _dbContext.EventEntries.Where(t => t.StreamId == streamId)
             .Select(t => JsonSerializer.Deserialize(t.EventText, _typeMapper.GetEventType(t.EventName), JsonSerializerOptions.Default)!)
             .ToArrayAsync();
 
-        _eventStreamLookup[aggregateId] = eventStream;
+        _eventStreamLookup[streamId] = eventStream;
 
         return (aggregateRoot, events);
     }
@@ -143,8 +145,6 @@ public class SqlAggregateStore : AggregateStoreBase
     private class DataBuffer
     {
         public List<EventStream> NewEventStreams { get; } = [];
-
-        public List<StreamIdMapping> NewStreamIdMappings { get; } = [];
 
         public List<EventEntry> NewEventEntries { get; } = [];
 

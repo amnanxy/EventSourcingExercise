@@ -1,5 +1,5 @@
 ﻿using EventSourcingExercise.Infrastructures.EventSourcing;
-using EventSourcingExercise.Infrastructures.EventSourcing.Models;
+using EventSourcingExercise.Infrastructures.Payments;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,24 +7,51 @@ namespace EventSourcingExercise.Extensions;
 
 public static class LocalTestingExtensions
 {
+    private const string EventSourcing = "ES";
+    private const string Payment = "Payment";
+    private static readonly SqliteConnection EventSourcingConnection;
+    private static readonly SqliteConnection PaymentConnection;
+
+    static LocalTestingExtensions()
+    {
+        EventSourcingConnection = new SqliteConnection("Filename=:memory:");
+        PaymentConnection = new SqliteConnection("Filename=:memory:");
+    }
+
     public static IServiceCollection UseMemoryDbContext(this IServiceCollection services)
     {
-        return services.AddSingleton(_ =>
+        EventSourcingConnection.Open();
+        PaymentConnection.Open();
+        return services.AddSingleton<Func<string, SqliteConnection>>(_ => (dbName) =>
+            {
+                return dbName switch
                 {
-                    var connection = new SqliteConnection("Filename=:memory:");
-                    connection.Open();
-                    return connection;
-                })
-                .AddDbContextFactory<EventSourcingDbContext>((provider, options) =>
-                {
-                    var connection = provider.GetRequiredService<SqliteConnection>();
-                    options.UseSqlite(connection);
-                }, ServiceLifetime.Scoped)
-                .AddDbContextFactory<EventSourcingReadOnlyDbContext>((provider, options) =>
-                {
-                    var connection = provider.GetRequiredService<SqliteConnection>();
-                    options.UseSqlite(connection)
-                        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                }, ServiceLifetime.Scoped);
+                    EventSourcing => EventSourcingConnection,
+                    Payment => PaymentConnection,
+                    _ => throw new NotSupportedException(),
+                };
+            })
+            .AddDbContextFactory<EventSourcingDbContext>((provider, options) =>
+            {
+                var factory = provider.GetRequiredService<Func<string, SqliteConnection>>();
+                options.UseSqlite(factory(EventSourcing));
+            }, ServiceLifetime.Scoped)
+            .AddDbContextFactory<EventSourcingReadOnlyDbContext>((provider, options) =>
+            {
+                var factory = provider.GetRequiredService<Func<string, SqliteConnection>>();
+                options.UseSqlite(factory(EventSourcing))
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }, ServiceLifetime.Scoped)
+            .AddDbContextFactory<PaymentDbContext>((provider, options) =>
+            {
+                var factory = provider.GetRequiredService<Func<string, SqliteConnection>>();
+                options.UseSqlite(factory(Payment));
+            }, ServiceLifetime.Scoped)
+            .AddDbContextFactory<PaymentReadonlyDbContext>((provider, options) =>
+            {
+                var factory = provider.GetRequiredService<Func<string, SqliteConnection>>();
+                options.UseSqlite(factory(Payment))
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }, ServiceLifetime.Scoped);
     }
 }

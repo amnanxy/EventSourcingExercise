@@ -2,15 +2,19 @@
 
 public abstract class AggregateStoreBase
 {
-    private readonly HashSet<string> _newAggregateIds = [];
-    private readonly Dictionary<string, AggregateRoot> _aggregateRootLookup = new();
+    private readonly HashSet<long> _newAggregateIds = [];
+    private readonly Dictionary<long, AggregateRoot> _aggregateRootLookup = new();
 
-    public void Add<TAggregate>(TAggregate aggregateRoot)
+    public long Add<TAggregate>(TAggregate aggregateRoot)
         where TAggregate : AggregateRoot
     {
-        _newAggregateIds.Add(aggregateRoot.Id);
-        _aggregateRootLookup.Add(aggregateRoot.Id, aggregateRoot);
+        var streamId = GetStreamId();
+        _newAggregateIds.Add(streamId);
+        _aggregateRootLookup.Add(streamId, aggregateRoot);
+        return streamId;
     }
+
+    protected abstract long GetStreamId();
 
     public void Update<TAggregate>(TAggregate aggregateRoot)
         where TAggregate : AggregateRoot
@@ -20,39 +24,36 @@ public abstract class AggregateStoreBase
 
     public async Task Commit()
     {
-        var aggregateRoots = _aggregateRootLookup
-            .Select(t => t.Value)
-            .Where(t => t.EventCount > 0)
-            .ToArray();
-
-        var aggregateItems = aggregateRoots
-            .Select(aggregateRoot => new AggregateItem
+        var aggregateItems = _aggregateRootLookup
+            .Where(t => t.Value.EventCount > 0)
+            .Select(t => new AggregateItem
             {
-                IsNewAggregate = _newAggregateIds.Contains(aggregateRoot.Id),
-                AggregateRoot = aggregateRoot,
+                IsNewAggregate = _newAggregateIds.Contains(t.Key),
+                StreamId = t.Key,
+                AggregateRoot = t.Value,
             })
             .ToArray();
 
         await InternalCommit(aggregateItems);
 
         _newAggregateIds.Clear();
-        foreach (var aggregateRoot in aggregateRoots)
+        foreach (var aggregateItem in aggregateItems)
         {
-            aggregateRoot.ClearEvents();
+            aggregateItem.AggregateRoot.ClearEvents();
         }
     }
 
     protected abstract Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems);
 
-    public async Task<TAggregate?> Get<TAggregate>(string aggregateId)
+    public async Task<TAggregate?> Get<TAggregate>(long streamId)
         where TAggregate : AggregateRoot
     {
-        if (_aggregateRootLookup.TryGetValue(aggregateId, out var value))
+        if (_aggregateRootLookup.TryGetValue(streamId, out var value))
         {
             return (TAggregate)value;
         }
 
-        var (aggregateObj, events) = await GetStreamEvents(aggregateId);
+        var (aggregateObj, events) = await GetStreamEvents(streamId);
         if (aggregateObj == null)
         {
             return null;
@@ -60,15 +61,17 @@ public abstract class AggregateStoreBase
 
         var aggregate = (TAggregate)aggregateObj;
         aggregate.Load(events);
-        _aggregateRootLookup[aggregateId] = aggregate;
+        _aggregateRootLookup[streamId] = aggregate;
         return aggregate;
     }
 
-    protected abstract Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(string aggregateId);
+    protected abstract Task<(object? Aggregate, IReadOnlyList<object> Events)> GetStreamEvents(long streamId);
 
     protected record AggregateItem
     {
         public bool IsNewAggregate { get; init; }
+
+        public long StreamId { get; init; }
 
         public required AggregateRoot AggregateRoot { get; init; }
     }

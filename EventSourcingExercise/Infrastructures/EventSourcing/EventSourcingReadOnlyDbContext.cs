@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EventSourcingExercise.Infrastructures.EventSourcing.Models;
+namespace EventSourcingExercise.Infrastructures.EventSourcing;
 
 public class EventSourcingReadOnlyDbContext : EventSourcingDbContext
 {

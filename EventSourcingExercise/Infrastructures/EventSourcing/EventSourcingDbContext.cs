@@ -1,5 +1,4 @@
 ﻿using EventSourcingExercise.Infrastructures.EventSourcing.Models;
-using EventSourcingExercise.Infrastructures.PersistenceModels;
 using EventSourcingExercise.Modules.Transactions.Domains.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +17,6 @@ public class EventSourcingDbContext : DbContext
     public DbSet<EventStream> EventStreams { get; init; }
 
     public DbSet<EventEntry> EventEntries { get; init; }
-
-    public DbSet<StreamIdMapping> StreamIdMappings { get; init; }
 
     public DbSet<OutboxEntry> OutboxEntries { get; init; }
 
@@ -89,26 +86,6 @@ public class EventSourcingDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(t => t.StreamId)
                 .IsRequired();
-        });
-
-        modelBuilder.Entity<StreamIdMapping>(builder =>
-        {
-            builder.ToTable("stream_id_mapping");
-
-            builder.HasKey(t => t.AggregateId)
-                .HasName("pk_aggregate_id");
-
-            builder.HasIndex(t => t.StreamId)
-                .IsUnique()
-                .HasDatabaseName("uk_stream_id");
-
-            builder.Property(t => t.AggregateId)
-                .HasColumnName("aggregate_id")
-                .HasColumnType("varchar(40)");
-
-            builder.Property(t => t.StreamId)
-                .HasColumnName("stream_id")
-                .HasColumnType("bigint");
         });
 
         modelBuilder.Entity<OutboxEntry>(builder =>

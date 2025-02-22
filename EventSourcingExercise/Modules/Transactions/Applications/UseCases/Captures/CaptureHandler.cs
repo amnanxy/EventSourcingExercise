@@ -1,4 +1,5 @@
 ﻿using EventSourcingExercise.Cores;
+using EventSourcingExercise.Infrastructures.Payments;
 using EventSourcingExercise.Modules.Transactions.Domains;
 using EventSourcingExercise.Utilities.IdGenerators;
 using EventSourcingExercise.Utilities.Results;
@@ -10,16 +11,20 @@ public class CaptureHandler : IRequestHandler<CaptureCommand, Result<CaptureResu
 {
     private readonly ITextIdGenerator _idGenerator;
     private readonly AggregateStoreBase _aggregateStore;
+    private readonly PaymentReadonlyDbContext _paymentReadonlyDbContext;
 
-    public CaptureHandler(ITextIdGenerator idGenerator, AggregateStoreBase aggregateStore)
+    public CaptureHandler(ITextIdGenerator idGenerator, AggregateStoreBase aggregateStore, PaymentReadonlyDbContext paymentReadonlyDbContext)
     {
         _idGenerator = idGenerator;
         _aggregateStore = aggregateStore;
+        _paymentReadonlyDbContext = paymentReadonlyDbContext;
     }
 
     public async Task<Result<CaptureResult?>> Handle(CaptureCommand request, CancellationToken cancellationToken)
     {
-        var payment = await _aggregateStore.Get<Payment>(request.TransactionId);
+        var idMapping = (await _paymentReadonlyDbContext.StreamIdMappings.FindAsync(request.TransactionId))!;
+
+        var payment = await _aggregateStore.Get<Payment>(idMapping.StreamId);
 
         if (payment == null)
         {

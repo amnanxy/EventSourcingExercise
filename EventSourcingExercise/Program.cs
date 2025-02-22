@@ -4,6 +4,7 @@ using Autofac.Extensions.DependencyInjection;
 using EventSourcingExercise.Extensions;
 using EventSourcingExercise.Infrastructures.EventSourcing;
 using EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
+using EventSourcingExercise.Infrastructures.Payments;
 using EventSourcingExercise.Modules.Generics.Entities;
 using MediatR;
 using Serilog;
@@ -56,6 +57,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.Services.GetRequiredService<EventSourcingDbContext>()
+        .Database.EnsureCreated();
+    app.Services.GetRequiredService<PaymentDbContext>()
         .Database.EnsureCreated();
 }
 
