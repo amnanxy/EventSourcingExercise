@@ -62,7 +62,7 @@ public class EventDeliveryService
         {
             EventId = eventEntry.Id,
             StreamId = eventEntry.StreamId,
-            TenantId = package.TenantId,
+            TenantCode = package.TenantCode,
             Version = eventEntry.Version,
             EventText = eventEntry.EventText,
             EventName = eventEntry.EventName,

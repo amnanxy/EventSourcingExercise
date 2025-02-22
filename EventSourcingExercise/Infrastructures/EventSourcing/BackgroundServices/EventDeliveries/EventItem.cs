@@ -11,7 +11,7 @@ public class EventItem
     public long StreamId { get; init; }
 
     [Id(2)]
-    public required string TenantId { get; init; }
+    public required string TenantCode { get; init; }
 
     [Id(3)]
     public int Version { get; init; }

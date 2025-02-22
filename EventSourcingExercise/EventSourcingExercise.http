@@ -1,5 +1,5 @@
 @EventSourcingExercise_HostAddress = http://localhost:5041
-@TenantId = TenantA
+@TenantCode = TenantA
 
 ### Health check
 GET {{EventSourcingExercise_HostAddress}}/_hc/
@@ -9,7 +9,7 @@ Accept: application/json
 POST {{EventSourcingExercise_HostAddress}}/transaction/pay
 Accept: application/json
 Content-Type: application/json
-Tenant-Id: {{TenantId}}
+Tenant-Code: {{TenantCode}}
 
 {
   "amount": 5
@@ -22,7 +22,7 @@ Tenant-Id: {{TenantId}}
 POST {{EventSourcingExercise_HostAddress}}/transaction/capture
 Accept: application/json
 Content-Type: application/json
-Tenant-Id: {{TenantId}}
+Tenant-Code: {{TenantCode}}
 
 {
   "transactionId": "{{transactionId}}"

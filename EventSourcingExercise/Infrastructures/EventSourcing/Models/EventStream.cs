@@ -8,5 +8,5 @@ public class EventStream
 
     public int Version { get; internal set; }
 
-    public required string TenantId { get; init; }
+    public required string TenantCode { get; init; }
 }

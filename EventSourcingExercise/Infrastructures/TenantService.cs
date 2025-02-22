@@ -11,9 +11,9 @@ public class TenantService : ITenantService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Task<string> GetTenantId()
+    public Task<string> GetTenantCode()
     {
-        var tenantId = _httpContextAccessor.HttpContext!.Request.Headers["Tenant-Id"].ToString();
-        return Task.FromResult(tenantId);
+        var tenantCode = _httpContextAccessor.HttpContext!.Request.Headers["Tenant-Code"].ToString();
+        return Task.FromResult(tenantCode);
     }
 }

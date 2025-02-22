@@ -41,13 +41,13 @@ public class SqlAggregateStore : AggregateStoreBase
 
     protected override async Task InternalCommit(IReadOnlyList<AggregateItem> aggregateItems)
     {
-        var tenantId = await _tenantService.GetTenantId();
+        var tenantCode = await _tenantService.GetTenantCode();
         var dataBuffer = aggregateItems.Aggregate(new DataBuffer(), (buffer, aggregateItem) =>
         {
             var aggregateRoot = aggregateItem.AggregateRoot;
             if (aggregateItem.IsNewAggregate)
             {
-                var newEventStream = CreateEventStream(aggregateItem.StreamId, aggregateItem, tenantId);
+                var newEventStream = CreateEventStream(aggregateItem.StreamId, aggregateItem, tenantCode);
                 buffer.NewEventStreams.Add(newEventStream);
 
                 _eventStreamLookup[aggregateItem.StreamId] = newEventStream;
@@ -72,7 +72,7 @@ public class SqlAggregateStore : AggregateStoreBase
 
         await _mediator.Publish(new EventsCreated
         {
-            TenantId = tenantId,
+            TenantCode = tenantCode,
             EventEntries = dataBuffer.NewEventEntries,
             OutboxEntries = dataBuffer.NewOutboxEntries,
         });
@@ -102,13 +102,13 @@ public class SqlAggregateStore : AggregateStoreBase
         };
     }
 
-    private EventStream CreateEventStream(long streamId, AggregateItem aggregateItem, string tenantId)
+    private EventStream CreateEventStream(long streamId, AggregateItem aggregateItem, string tenantCode)
     {
         return new EventStream
         {
             Id = streamId,
             AggregateRootTypeName = _typeMapper.GetAggregateRootName(aggregateItem.AggregateRoot.GetType()),
-            TenantId = tenantId,
+            TenantCode = tenantCode,
         };
     }
 

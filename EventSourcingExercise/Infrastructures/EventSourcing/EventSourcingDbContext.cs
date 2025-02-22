@@ -42,8 +42,8 @@ public class EventSourcingDbContext : DbContext
                 .HasColumnType("int")
                 .IsConcurrencyToken();
 
-            builder.Property(t => t.TenantId)
-                .HasColumnName("tenant_id")
+            builder.Property(t => t.TenantCode)
+                .HasColumnName("tenant_code")
                 .HasColumnType("varchar(40)");
         });
 

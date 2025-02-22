@@ -16,7 +16,7 @@ public class EventsCreatedObserver : INotificationHandler<EventsCreated>
     {
         await _eventDeliveryChannel.Write(new EventDeliveryPackage
         {
-            TenantId = notification.TenantId,
+            TenantCode = notification.TenantCode,
             EventEntries = notification.EventEntries,
             OutboxEntries = notification.OutboxEntries,
         });

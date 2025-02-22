@@ -4,7 +4,7 @@ namespace EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices
 
 public class EventDeliveryPackage
 {
-    public required string TenantId { get; init; }
+    public required string TenantCode { get; init; }
 
     public required IReadOnlyList<EventEntry> EventEntries { get; init; }
 
