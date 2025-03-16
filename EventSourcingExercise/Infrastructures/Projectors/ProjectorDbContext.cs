@@ -25,7 +25,7 @@ public class ProjectorDbContext : DbContext
                 .HasName("pk_stream_id");
 
             builder.Property(t => t.StreamId)
-                .HasColumnType("long")
+                .HasColumnType("bigint")
                 .HasColumnName("stream_id")
                 .ValueGeneratedNever();
 

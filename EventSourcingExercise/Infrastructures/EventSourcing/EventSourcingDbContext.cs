@@ -31,7 +31,8 @@ public class EventSourcingDbContext : DbContext
 
             builder.Property(t => t.Id)
                 .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                .HasColumnType("bigint")
+                .ValueGeneratedNever();
 
             builder.Property(t => t.AggregateRootTypeName)
                 .HasColumnName("aggregate_root_type_name")
@@ -60,7 +61,8 @@ public class EventSourcingDbContext : DbContext
 
             builder.Property(t => t.Id)
                 .HasColumnName("id")
-                .ValueGeneratedOnAdd();
+                .HasColumnType("bigint")
+                .ValueGeneratedNever();
 
             builder.Property(t => t.StreamId)
                 .HasColumnName("stream_id")
@@ -100,7 +102,9 @@ public class EventSourcingDbContext : DbContext
                 .HasDatabaseName("ix_created_at_filter");
 
             builder.Property(t => t.EventId)
-                .HasColumnName("event_id");
+                .HasColumnName("event_id")
+                .HasColumnType("bigint")
+                .ValueGeneratedNever();
 
             builder.Property(t => t.Status)
                 .HasColumnName("status")
