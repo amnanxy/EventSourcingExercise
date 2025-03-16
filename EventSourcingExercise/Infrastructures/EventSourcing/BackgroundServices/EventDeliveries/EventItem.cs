@@ -4,11 +4,11 @@
 [Alias("EventSourcingExercise.Infrastructures.BackgroundServices.EventDeliveries.EventItem")]
 public class EventItem
 {
-    [Id(0)]
-    public long EventId { get; init; }
-
-    [Id(1)]
+    [Id(0)] 
     public long StreamId { get; init; }
+
+    [Id(1)] 
+    public long EventId { get; init; }
 
     [Id(2)]
     public required string TenantCode { get; init; }

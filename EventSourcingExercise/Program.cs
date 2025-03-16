@@ -5,6 +5,7 @@ using EventSourcingExercise.Extensions;
 using EventSourcingExercise.Infrastructures.EventSourcing;
 using EventSourcingExercise.Infrastructures.EventSourcing.BackgroundServices.EventDeliveries;
 using EventSourcingExercise.Infrastructures.Payments;
+using EventSourcingExercise.Infrastructures.Projectors;
 using EventSourcingExercise.Modules.Generics.Entities;
 using MediatR;
 using Serilog;
@@ -59,6 +60,8 @@ if (app.Environment.IsDevelopment())
     app.Services.GetRequiredService<EventSourcingDbContext>()
         .Database.EnsureCreated();
     app.Services.GetRequiredService<PaymentDbContext>()
+        .Database.EnsureCreated();
+    app.Services.GetRequiredService<ProjectorDbContext>()
         .Database.EnsureCreated();
 }
 
