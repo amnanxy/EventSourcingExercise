@@ -30,3 +30,7 @@ Tenant-Code: {{TenantCode}}
 
 ### Operation - Query Payment Aggregate
 GET {{EventSourcingExercise_HostAddress}}/operation/payment/{{transactionId}}
+
+### Operation - Query Transaction Record
+GET {{EventSourcingExercise_HostAddress}}/operation/transaction-record/{{transactionId}}
+
